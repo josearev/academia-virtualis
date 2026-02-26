@@ -13,10 +13,6 @@ const copyPlan = [
     target: path.join(rootDir, "public", "vendor", "aframe", "aframe.min.js")
   },
   {
-    source: path.join(rootDir, "node_modules", "mind-ar", "dist", "mindar-image.prod.js"),
-    target: path.join(rootDir, "public", "vendor", "mindar", "mindar-image.prod.js")
-  },
-  {
     source: path.join(rootDir, "node_modules", "mind-ar", "dist", "mindar-image-aframe.prod.js"),
     target: path.join(rootDir, "public", "vendor", "mindar", "mindar-image-aframe.prod.js")
   }
