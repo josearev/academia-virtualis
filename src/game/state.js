@@ -1,13 +1,13 @@
 export const PLANETS = [
-  { id: "mercurio", name: "Mercurio", color: "#b6b6b6", radius: 0.02, orbitRadius: 0.18, orbitSpeed: 1.45 },
-  { id: "venus", name: "Venus", color: "#d0ab69", radius: 0.024, orbitRadius: 0.24, orbitSpeed: 1.2 },
-  { id: "tierra", name: "Tierra", color: "#3a8ef6", radius: 0.026, orbitRadius: 0.31, orbitSpeed: 1.05 },
-  { id: "marte", name: "Marte", color: "#cf664f", radius: 0.022, orbitRadius: 0.37, orbitSpeed: 0.91 },
-  { id: "jupiter", name: "Jupiter", color: "#d7a986", radius: 0.052, orbitRadius: 0.5, orbitSpeed: 0.68 },
-  { id: "saturno", name: "Saturno", color: "#d4bf8c", radius: 0.046, orbitRadius: 0.62, orbitSpeed: 0.53 },
-  { id: "urano", name: "Urano", color: "#88c0c7", radius: 0.034, orbitRadius: 0.73, orbitSpeed: 0.42 },
-  { id: "neptuno", name: "Neptuno", color: "#4c6fd8", radius: 0.033, orbitRadius: 0.84, orbitSpeed: 0.37 },
-  { id: "pluton", name: "Pluton", color: "#ba9885", radius: 0.015, orbitRadius: 0.93, orbitSpeed: 0.29 }
+  { id: "mercurio", name: "Mercurio", color: "#b5b5b5", radius: 0.020, orbitRadius: 0.06, orbitSpeed: 1.45, speedFactor: 1.3 },
+  { id: "venus",    name: "Venus",    color: "#d4a96a", radius: 0.024, orbitRadius: 0.10, orbitSpeed: 1.2,  speedFactor: 1.18 },
+  { id: "tierra",   name: "Tierra",   color: "#3a8ef6", radius: 0.026, orbitRadius: 0.14, orbitSpeed: 1.05, speedFactor: 1.05 },
+  { id: "marte",    name: "Marte",    color: "#cf664f", radius: 0.022, orbitRadius: 0.18, orbitSpeed: 0.91, speedFactor: 0.94 },
+  { id: "jupiter",  name: "Jupiter",  color: "#d7a986", radius: 0.052, orbitRadius: 0.26, orbitSpeed: 0.68, speedFactor: 0.78 },
+  { id: "saturno",  name: "Saturno",  color: "#d4bf8c", radius: 0.046, orbitRadius: 0.33, orbitSpeed: 0.53, speedFactor: 0.66 },
+  { id: "urano",    name: "Urano",    color: "#88c0c7", radius: 0.034, orbitRadius: 0.40, orbitSpeed: 0.42, speedFactor: 0.53 },
+  { id: "neptuno",  name: "Neptuno",  color: "#4c6fd8", radius: 0.033, orbitRadius: 0.46, orbitSpeed: 0.37, speedFactor: 0.49 },
+  { id: "pluton",   name: "Pluton",   color: "#ba9885", radius: 0.015, orbitRadius: 0.52, orbitSpeed: 0.29, speedFactor: 0.44 }
 ];
 
 const shuffle = (input) => {

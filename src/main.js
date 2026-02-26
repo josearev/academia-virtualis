@@ -7,7 +7,7 @@ import { createOverlay } from "./ui/overlay.js";
 const SUCCESS_TEXT =
   "Felicidades! Has completado la actividad. Ahora has ganado 1 NFT que será guardado en tu NFT gallery";
 const RETURN_URL = "https://xerticagrupoacererobdr.my.canva.site/c1fncgdhef8bcwqy";
-const SNAP_DISTANCE = 86;
+const SNAP_DISTANCE = 100;
 const MINDAR_WAIT_TIMEOUT_MS = 12000;
 const MINDAR_POLL_INTERVAL_MS = 120;
 const IOS_RESIZE_DELAYS_MS = [0, 120, 320, 650];
@@ -266,7 +266,6 @@ sceneEl.addEventListener("arReady", () => {
   arStarted = true;
   startInProgress = false;
   cameraGate.classList.add("hidden");
-  solarScene.setLayoutPreset("didactic");
   logStartup("Motor AR activo.");
   overlay.setStatus("Buscando marcador. Apunta la cámara al marcador AR técnico.", false);
   scheduleIosResizes();
@@ -286,7 +285,6 @@ targetEl.addEventListener("targetFound", () => {
   overlay.setDefaultStatus(true);
   zoomControls.hidden = false;
 
-  solarScene.setLayoutPreset("didactic");
   const fittedScale = solarScene.fitCorePlanetsToMarker();
   updateZoomUi(fittedScale);
 
