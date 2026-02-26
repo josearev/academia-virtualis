@@ -326,6 +326,20 @@ button {
   color: #f4f8ff;
 }
 
+#debug-hud {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: 12px;
+  z-index: 100;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #0f0;
+  font-family: monospace;
+  font-size: 12px;
+  pointer-events: none;
+}
+
 @media (max-width: 768px) {
   #hud {
     flex-direction: column;

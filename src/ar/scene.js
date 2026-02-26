@@ -9,7 +9,7 @@ const CORE_PLANETS = ["mercurio", "venus", "tierra", "marte"];
 const CORE_TARGET_WIDTH = 0.34;
 const MIN_ORBIT_SCALE = 0.4;
 const MAX_ORBIT_SCALE = 3.0;
-const DEFAULT_ORBIT_SCALE = 1.0;
+const DEFAULT_ORBIT_SCALE = 2.5;
 
 const createPlanetTexture = (three, planetId) => {
   const size = 256;
@@ -342,6 +342,7 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
 
   applyLayout();
   applyScale();
+  setOrbitScale(DEFAULT_ORBIT_SCALE); // sincroniza orbitRingsGroup.scale desde el inicio
 
   return {
     update(timeSeconds) {

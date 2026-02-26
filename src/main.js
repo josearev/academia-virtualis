@@ -48,6 +48,7 @@ const zoomRange = document.querySelector("#zoom-range");
 const zoomValue = document.querySelector("#zoom-value");
 const orbitRange = document.querySelector("#orbit-range");
 const orbitValue = document.querySelector("#orbit-value");
+const debugHud = document.querySelector("#debug-hud");
 
 const solarScene = createSolarSystemScene({
   targetEl,
@@ -63,6 +64,7 @@ let dragLockedByCompletion = false;
 let pinchActive = false;
 let pinchStartDistance = 0;
 let pinchStartScale = 1;
+let activeDragLabel = null;
 const pinchPointers = new Map();
 
 const logStartup = (text) => {
@@ -203,20 +205,25 @@ const pointerDistance = ([first, second]) => {
 };
 
 applySolarScale(initialScale);
+applyOrbitScale(initialOrbitScale);
 
 const dragController = createDragController({
   canDrag: (labelId) => {
     const label = findLabel(gameState, labelId);
-    return Boolean(label && !label.locked && gameState.markerVisible && !gameState.completed);
+    const result = Boolean(label && !label.locked && gameState.markerVisible && !gameState.completed);
+    console.log(`[drag] canDrag(${labelId}): ${result} | locked=${label?.locked} visible=${gameState.markerVisible} completed=${gameState.completed}`);
+    return result;
   },
   onDragStart: (labelId, x, y) => {
     const label = findLabel(gameState, labelId);
     if (!label) {
       return;
     }
+    activeDragLabel = labelId;
     label.dragging = true;
     label.pointerX = x;
     label.pointerY = y;
+    console.log(`[drag] START ${labelId} @ (${x}, ${y})`);
   },
   onDragMove: (labelId, x, y) => {
     const label = findLabel(gameState, labelId);
@@ -232,7 +239,9 @@ const dragController = createDragController({
       return;
     }
 
+    activeDragLabel = null;
     label.dragging = false;
+    console.log(`[drag] END ${labelId} @ (${x}, ${y})`)
 
     if (x === null || y === null || !gameState.markerVisible || gameState.completed) {
       return;
@@ -463,6 +472,14 @@ window.addEventListener("pointermove", onPointerMove, { passive: false });
 window.addEventListener("pointerup", onPointerUp, { passive: true });
 window.addEventListener("pointercancel", onPointerUp, { passive: true });
 
+window.addEventListener("keydown", (event) => {
+  if (event.key === "m" || event.key === "M") {
+    gameState.markerVisible = !gameState.markerVisible;
+    overlay.setDefaultStatus(gameState.markerVisible);
+    console.log(`[DEBUG] markerVisible forzado → ${gameState.markerVisible}`);
+  }
+});
+
 if (!isCameraContextAllowed()) {
   setGateStatus(INSECURE_CONTEXT_TEXT);
   startArButton.disabled = true;
@@ -490,6 +507,11 @@ const renderLabels = () => {
 
     overlay.renderLabel(label, x, y, visible);
   });
+
+  if (debugHud) {
+    const visibleCount = gameState.labels.filter(l => !l.locked && latestPositions[l.displayPlanetId]).length;
+    debugHud.textContent = `M:${gameState.markerVisible ? "✓" : "✗"} drag:${activeDragLabel || "--"} vis:${visibleCount}`;
+  }
 };
 
 const findNearestPlanet = (x, y, positions) => {
