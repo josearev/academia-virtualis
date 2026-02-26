@@ -124,3 +124,18 @@ Por favor implementa las siguientes mejoras:
 5. Guardar preferencias de sliders en cookies y mantenerlas cuando se pierda el marcador y se lo vuelva a encontrar
 6. Hacer el confeti un poco más denso 2.5x de lo actual
 7. Guarda todas las preferencias y constantes en un archivo separado con comentarios para fácil manipulación
+
+por favor corrige esto:
+1. popup de NFT necesita ser más ancho para contener el nuevo botón de descargar
+2. se eliminó el comportamiento del botón M, pero no se eliminó el indicador en pantalla, elimina esto y código asociado que sea innecesario
+
+---
+
+nuevas mejoras:
+
+1. Agregar nuevo conjunto de sliders, estos deben estar en un recuadro separado y visible sólo cuando se active mediante un flag de configuración(activarlo en este momento para validar)
+1. estos sliders deben permitir la rotación en los ejes X, Y, Z de todo el sistema solar
+
+---
+
+Agregar readme.md para github
