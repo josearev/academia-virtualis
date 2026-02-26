@@ -1,21 +1,24 @@
-const BASE_SYSTEM_SCALE = 0.9;
-const PLANET_SCALE = 1.35;
-const SUN_SCALE = 0.84;
-const MIN_ZOOM_SCALE = 0.8;
-const MAX_ZOOM_SCALE = 5;
-const DEFAULT_ZOOM_SCALE = 1.2;
-const ORBIT_SPEED_SCALE = 0.25;
-const CORE_PLANETS = ["mercurio", "venus", "tierra", "marte"];
-const CORE_TARGET_WIDTH = 0.34;
-const MIN_ORBIT_SCALE = 2.0;
-const MAX_ORBIT_SCALE = 5.0;
-const DEFAULT_ORBIT_SCALE = 2.5;
-const MIN_PLANET_SCALE = 0.5;
-const MAX_PLANET_SCALE = 3.0;
-const DEFAULT_PLANET_SCALE = 1.0;
-const MIN_SPEED_SCALE = 0;
-const MAX_SPEED_SCALE = 3.0;
-const DEFAULT_SPEED_SCALE = 0.7;
+import { SCENE_CONFIG } from "../config/app-config.js";
+
+const BASE_SYSTEM_SCALE = SCENE_CONFIG.baseSystemScale;
+const PLANET_SCALE = SCENE_CONFIG.planetScale;
+const SUN_SCALE = SCENE_CONFIG.sunScale;
+const ORBIT_SPEED_SCALE = SCENE_CONFIG.orbitSpeedScale;
+const CORE_PLANETS = SCENE_CONFIG.corePlanets;
+const CORE_TARGET_WIDTH = SCENE_CONFIG.coreTargetWidth;
+
+const MIN_ZOOM_SCALE = SCENE_CONFIG.zoom.min;
+const MAX_ZOOM_SCALE = SCENE_CONFIG.zoom.max;
+const DEFAULT_ZOOM_SCALE = SCENE_CONFIG.zoom.initial;
+const MIN_ORBIT_SCALE = SCENE_CONFIG.orbit.min;
+const MAX_ORBIT_SCALE = SCENE_CONFIG.orbit.max;
+const DEFAULT_ORBIT_SCALE = SCENE_CONFIG.orbit.initial;
+const MIN_PLANET_SCALE = SCENE_CONFIG.planet.min;
+const MAX_PLANET_SCALE = SCENE_CONFIG.planet.max;
+const DEFAULT_PLANET_SCALE = SCENE_CONFIG.planet.initial;
+const MIN_SPEED_SCALE = SCENE_CONFIG.speed.min;
+const MAX_SPEED_SCALE = SCENE_CONFIG.speed.max;
+const DEFAULT_SPEED_SCALE = SCENE_CONFIG.speed.initial;
 
 const createPlanetTexture = (three, planetId) => {
   const size = 256;

@@ -1,32 +1,40 @@
 import { createSolarSystemScene } from "./ar/scene.js";
+import {
+  APP_CONFIG,
+  APP_VERSION,
+  UI_PREFERENCES,
+  getSliderPreferenceFromCookies,
+  saveSliderPreferenceToCookies
+} from "./config/app-config.js";
 import { createDragController } from "./game/dragdrop.js";
 import { createGameState, findLabel, PLANETS } from "./game/state.js";
 import { awardRandomNft } from "./nft/gallery.js";
 import { createOverlay } from "./ui/overlay.js";
 
-const SUCCESS_TEXT =
-  "Felicidades! Has completado la actividad. Ahora has ganado 1 NFT que será guardado en tu NFT gallery";
-const RETURN_URL = "https://xerticagrupoacererobdr.my.canva.site/c1fncgdhef8bcwqy";
-const APP_VERSION = "0.10";
-const SNAP_DISTANCE = 100;
-const COMPLETION_COUNTDOWN_SECONDS = 5;
+const SUCCESS_TEXT = APP_CONFIG.successText;
+const RETURN_URL = APP_CONFIG.returnUrl;
+const SNAP_DISTANCE = APP_CONFIG.snapDistance;
+const COMPLETION_COUNTDOWN_SECONDS = APP_CONFIG.completionCountdownSeconds;
 const CONFETTI_DURATION_MS = COMPLETION_COUNTDOWN_SECONDS * 1000;
-const MINDAR_WAIT_TIMEOUT_MS = 12000;
-const MINDAR_POLL_INTERVAL_MS = 120;
-const IOS_RESIZE_DELAYS_MS = [0, 120, 320, 650];
-const INSECURE_CONTEXT_TEXT =
-  "Camara bloqueada por navegador: abre este sitio en HTTPS para usar AR en iPhone/iPad.";
-const CONFETTI_COLORS = ["#ffde59", "#ff6b6b", "#4ecdc4", "#7f5af0", "#58a6ff", "#ff9f1c"];
-const LABEL_OFFSET_BY_PLANET_ID = {
-  mercurio: 30,
-  venus: 34,
-  tierra: 38,
-  marte: 34,
-  jupiter: 44,
-  saturno: 42,
-  urano: 38,
-  neptuno: 38,
-  pluton: 30
+const MINDAR_WAIT_TIMEOUT_MS = APP_CONFIG.mindarWaitTimeoutMs;
+const MINDAR_POLL_INTERVAL_MS = APP_CONFIG.mindarPollIntervalMs;
+const IOS_RESIZE_DELAYS_MS = APP_CONFIG.iosResizeDelaysMs;
+const INSECURE_CONTEXT_TEXT = APP_CONFIG.insecureContextText;
+const LABEL_OFFSET_BY_PLANET_ID = UI_PREFERENCES.labelOffsetByPlanetId;
+const CONFETTI_COLORS = UI_PREFERENCES.confettiColors;
+const CONFETTI_DENSITY_FACTOR = UI_PREFERENCES.confettiDensityFactor;
+
+const downloadNftImage = (imageSrc) => {
+  if (!imageSrc) {
+    return;
+  }
+  const anchor = document.createElement("a");
+  const fileName = imageSrc.split("/").pop() || `nft-${Date.now()}.png`;
+  anchor.href = imageSrc;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
 };
 
 const gameState = createGameState();
@@ -35,11 +43,14 @@ const overlay = createOverlay({
   onRetry: () => window.location.reload(),
   onClose: () => {
     window.location.href = RETURN_URL;
+  },
+  onDownload: (imageSrc) => {
+    downloadNftImage(imageSrc);
   }
 });
 
 overlay.setProgress(gameState.correctCount, gameState.totalCount);
-overlay.setStatus("Iniciando camara AR automaticamente...", false);
+overlay.setStatus(APP_CONFIG.autoStartStatusText, false);
 
 const sceneEl = document.querySelector("#ar-scene");
 const targetEl = document.querySelector("#target-root");
@@ -170,7 +181,8 @@ const startConfettiAnimation = (durationMs = CONFETTI_DURATION_MS) => {
   stopConfettiAnimation();
   resizeConfettiLayer();
   confettiLayer.hidden = false;
-  const pieceCount = Math.min(180, Math.max(90, Math.floor(window.innerWidth * 0.16)));
+  const basePieceCount = Math.min(180, Math.max(90, Math.floor(window.innerWidth * 0.16)));
+  const pieceCount = Math.max(1, Math.round(basePieceCount * CONFETTI_DENSITY_FACTOR));
   confettiPieces = Array.from({ length: pieceCount }, () => createConfettiPiece(true));
 
   let lastTime = performance.now();
@@ -300,7 +312,7 @@ const { min: minScale, max: maxScale, initial: initialScale } = solarScene.getSc
 
 zoomRange.min = String(minScale);
 zoomRange.max = String(maxScale);
-zoomRange.value = String(initialScale);
+zoomRange.step = "0.01";
 
 const clampScale = (scale) => Math.min(maxScale, Math.max(minScale, scale));
 
@@ -310,9 +322,20 @@ const updateZoomUi = (scale) => {
   zoomValue.textContent = `${fixed}x`;
 };
 
-const applySolarScale = (nextScale) => {
+const getInitialSliderValue = (sliderKey, min, max, fallbackValue) => {
+  const fromCookie = getSliderPreferenceFromCookies(sliderKey);
+  if (!Number.isFinite(fromCookie)) {
+    return fallbackValue;
+  }
+  return Math.min(max, Math.max(min, fromCookie));
+};
+
+const applySolarScale = (nextScale, { persist = true } = {}) => {
   const applied = solarScene.setScale(clampScale(nextScale));
   updateZoomUi(applied);
+  if (persist) {
+    saveSliderPreferenceToCookies("zoom", applied);
+  }
   return applied;
 };
 
@@ -320,7 +343,7 @@ const { min: minOrbitScale, max: maxOrbitScale, initial: initialOrbitScale } = s
 
 orbitRange.min = String(minOrbitScale);
 orbitRange.max = String(maxOrbitScale);
-orbitRange.value = String(initialOrbitScale);
+orbitRange.step = "0.05";
 
 const updateOrbitUi = (scale) => {
   const fixed = scale.toFixed(2);
@@ -328,9 +351,12 @@ const updateOrbitUi = (scale) => {
   orbitValue.textContent = `${fixed}x`;
 };
 
-const applyOrbitScale = (nextScale) => {
+const applyOrbitScale = (nextScale, { persist = true } = {}) => {
   const applied = solarScene.setOrbitScale(nextScale);
   updateOrbitUi(applied);
+  if (persist) {
+    saveSliderPreferenceToCookies("orbit", applied);
+  }
   return applied;
 };
 
@@ -338,7 +364,7 @@ const { min: minPlanetScale, max: maxPlanetScale, initial: initialPlanetScale } 
 
 planetRange.min = String(minPlanetScale);
 planetRange.max = String(maxPlanetScale);
-planetRange.value = String(initialPlanetScale);
+planetRange.step = "0.05";
 
 const updatePlanetUi = (scale) => {
   const fixed = scale.toFixed(2);
@@ -346,9 +372,12 @@ const updatePlanetUi = (scale) => {
   planetValue.textContent = `${fixed}x`;
 };
 
-const applyPlanetScale = (nextScale) => {
+const applyPlanetScale = (nextScale, { persist = true } = {}) => {
   const applied = solarScene.setPlanetScale(nextScale);
   updatePlanetUi(applied);
+  if (persist) {
+    saveSliderPreferenceToCookies("planet", applied);
+  }
   return applied;
 };
 
@@ -356,7 +385,7 @@ const { min: minSpeedScale, max: maxSpeedScale, initial: initialSpeedScale } = s
 
 speedRange.min = String(minSpeedScale);
 speedRange.max = String(maxSpeedScale);
-speedRange.value = String(initialSpeedScale);
+speedRange.step = "0.05";
 
 const updateSpeedUi = (scale) => {
   const fixed = scale.toFixed(2);
@@ -364,9 +393,12 @@ const updateSpeedUi = (scale) => {
   speedValue.textContent = `${fixed}x`;
 };
 
-const applyOrbitSpeed = (nextScale) => {
+const applyOrbitSpeed = (nextScale, { persist = true } = {}) => {
   const applied = solarScene.setOrbitSpeed(nextScale);
   updateSpeedUi(applied);
+  if (persist) {
+    saveSliderPreferenceToCookies("speed", applied);
+  }
   return applied;
 };
 
@@ -374,10 +406,15 @@ const pointerDistance = ([first, second]) => {
   return Math.hypot(first.x - second.x, first.y - second.y);
 };
 
-applySolarScale(initialScale);
-applyOrbitScale(initialOrbitScale);
-applyPlanetScale(initialPlanetScale);
-applyOrbitSpeed(initialSpeedScale);
+const initialZoomValue = getInitialSliderValue("zoom", minScale, maxScale, initialScale);
+const initialOrbitValue = getInitialSliderValue("orbit", minOrbitScale, maxOrbitScale, initialOrbitScale);
+const initialPlanetValue = getInitialSliderValue("planet", minPlanetScale, maxPlanetScale, initialPlanetScale);
+const initialSpeedValue = getInitialSliderValue("speed", minSpeedScale, maxSpeedScale, initialSpeedScale);
+
+applySolarScale(initialZoomValue, { persist: false });
+applyOrbitScale(initialOrbitValue, { persist: false });
+applyPlanetScale(initialPlanetValue, { persist: false });
+applyOrbitSpeed(initialSpeedValue, { persist: false });
 
 const dragController = createDragController({
   canDrag: (labelId) => {
@@ -495,9 +532,6 @@ targetEl.addEventListener("targetFound", () => {
   gameState.markerVisible = true;
   overlay.setDefaultStatus(true);
   zoomControls.hidden = false;
-
-  const fittedScale = solarScene.fitCorePlanetsToMarker();
-  updateZoomUi(fittedScale);
 
   scheduleIosResizes();
 });
@@ -638,7 +672,7 @@ const onPointerMove = (event) => {
   event.preventDefault();
   const points = [...pinchPointers.values()];
   const ratio = pointerDistance(points) / pinchStartDistance;
-  applySolarScale(pinchStartScale * ratio);
+  applySolarScale(pinchStartScale * ratio, { persist: false });
 };
 
 const onPointerUp = (event) => {
@@ -649,6 +683,7 @@ const onPointerUp = (event) => {
   pinchPointers.delete(event.pointerId);
   if (pinchActive && pinchPointers.size < 2) {
     pinchActive = false;
+    saveSliderPreferenceToCookies("zoom", solarScene.getScale());
     if (!dragLockedByCompletion) {
       dragController.setEnabled(true);
     }
@@ -676,14 +711,6 @@ window.addEventListener("pointermove", onPointerMove, { passive: false });
 window.addEventListener("pointerup", onPointerUp, { passive: true });
 window.addEventListener("pointercancel", onPointerUp, { passive: true });
 
-window.addEventListener("keydown", (event) => {
-  if (event.key === "m" || event.key === "M") {
-    gameState.markerVisible = !gameState.markerVisible;
-    overlay.setDefaultStatus(gameState.markerVisible);
-    console.log(`[DEBUG] markerVisible forzado → ${gameState.markerVisible}`);
-  }
-});
-
 if (!isCameraContextAllowed()) {
   setGateStatus(INSECURE_CONTEXT_TEXT);
   startArButton.disabled = true;
@@ -693,7 +720,7 @@ if (!isCameraContextAllowed()) {
   startArButton.disabled = true;
   logStartup("navigator.mediaDevices no disponible.");
 } else {
-  setGateStatus("Iniciando camara AR automaticamente...");
+  setGateStatus(APP_CONFIG.autoStartStatusText);
   window.setTimeout(() => {
     void startAr();
   }, 120);

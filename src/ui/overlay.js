@@ -1,7 +1,9 @@
-const STATUS_TRACKING = "Marcador detectado. Arrastra cada nombre al planeta correcto.";
-const STATUS_SCANNING = "Buscando marcador. Apunta la cámara al marcador AR técnico.";
+import { OVERLAY_TEXTS } from "../config/app-config.js";
 
-export const createOverlay = ({ labels, onRetry, onClose }) => {
+const STATUS_TRACKING = OVERLAY_TEXTS.tracking;
+const STATUS_SCANNING = OVERLAY_TEXTS.scanning;
+
+export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
   const statusPill = document.querySelector("#status-pill");
   const progressPill = document.querySelector("#progress-pill");
   const labelsLayer = document.querySelector("#labels-layer");
@@ -15,11 +17,18 @@ export const createOverlay = ({ labels, onRetry, onClose }) => {
   const actionButtons = document.querySelector("#action-buttons");
   const retryBtn = document.querySelector("#retry-btn");
   const closeBtn = document.querySelector("#close-btn");
+  const downloadBtn = document.querySelector("#download-btn");
 
   const labelElements = new Map();
+  let currentNftImageSrc = "";
 
   retryBtn.addEventListener("click", onRetry);
   closeBtn.addEventListener("click", onClose);
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", () => {
+      onDownload?.(currentNftImageSrc);
+    });
+  }
 
   labels.forEach((label) => {
     const element = document.createElement("button");
@@ -97,6 +106,7 @@ export const createOverlay = ({ labels, onRetry, onClose }) => {
       nftModal.hidden = false;
       nftFigure.hidden = true;
       actionButtons.hidden = true;
+      currentNftImageSrc = imageSrc;
       nftImage.src = imageSrc;
       nftFigure.hidden = false;
       actionButtons.hidden = false;
