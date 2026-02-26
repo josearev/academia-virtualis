@@ -87,7 +87,7 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
   const planetNodes = new Map();
   const tmpVector = new three.Vector3();
 
-  planets.forEach((planet) => {
+  planets.forEach((planet, idx) => {
     const orbitPivot = new three.Object3D();
     const mesh = createPlanetMesh(three, planet);
     orbitPivot.add(mesh);
@@ -108,7 +108,8 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
       orbitPivot,
       baseX: 0,
       microOrbit: 0.008,
-      speedFactor: 1
+      speedFactor: 1,
+      phaseOffset: idx * 0.35
     });
   });
 
@@ -175,8 +176,8 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
     update(timeSeconds) {
       sun.rotation.y = timeSeconds * 0.28;
 
-      planetNodes.forEach((node, index) => {
-        node.orbitPivot.rotation.y = timeSeconds * node.data.orbitSpeed * node.speedFactor + index * 0.35;
+      planetNodes.forEach((node) => {
+        node.orbitPivot.rotation.y = timeSeconds * node.data.orbitSpeed * node.speedFactor + node.phaseOffset;
         node.mesh.rotation.y = timeSeconds * 1.2;
       });
     },
