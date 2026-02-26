@@ -1,0 +1,21 @@
+{
+  "name": "academia-virtualis",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "compile:target": "node scripts/compile-target.mjs",
+    "dev": "vite",
+    "dev:host": "vite --host 0.0.0.0 --port 5173",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "tunnel": "lt --port 5173"
+  },
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "localtunnel": "^2.0.2",
+    "mind-ar": "^1.2.5"
+  },
+  "devDependencies": {
+    "vite": "^7.1.0"
+  }
+}

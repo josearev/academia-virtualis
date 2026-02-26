@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Academia Virtualis - Sistema Solar AR</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  </head>
+  <body>
+    <div id="app-shell">
+      <a-scene
+        id="ar-scene"
+        mindar-image="imageTargetSrc: /assets/targets/logo-eight-academy.mind; autoStart: true; maxTrack: 1; uiLoading: no; uiScanning: no;"
+        color-space="sRGB"
+        renderer="colorManagement: true, physicallyCorrectLights"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false"
+        embedded
+      >
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity id="target-root" mindar-image-target="targetIndex: 0"></a-entity>
+      </a-scene>
+
+      <div id="hud" aria-live="polite">
+        <div id="status-pill">Iniciando cámara AR...</div>
+        <div id="progress-pill">Aciertos: 0/9</div>
+      </div>
+
+      <div id="labels-layer" aria-label="Etiquetas de planetas"></div>
+      <div id="stamp-layer" aria-hidden="true"></div>
+
+      <section id="completion-modal" hidden>
+        <h1>Actividad completada</h1>
+        <p id="completion-message"></p>
+        <figure id="nft-figure" hidden>
+          <img id="nft-image" alt="NFT ganado" />
+          <figcaption>NFT asignado a tu galería local</figcaption>
+        </figure>
+        <div id="action-buttons" hidden>
+          <button id="retry-btn" type="button">Volver a intentar</button>
+          <button id="close-btn" type="button">Cerrar sitio</button>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

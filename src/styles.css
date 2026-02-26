@@ -1,0 +1,253 @@
+:root {
+  --bg: #020611;
+  --panel: rgba(7, 18, 41, 0.74);
+  --text: #e7f1ff;
+  --text-subtle: #bfd3ee;
+  --ok: #2cd47a;
+  --chip: #102957;
+  --warning: #ffd36a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(circle at 20% 20%, #12325f 0%, var(--bg) 55%);
+  color: var(--text);
+  font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  touch-action: none;
+}
+
+#app-shell,
+#ar-scene {
+  position: fixed;
+  inset: 0;
+}
+
+#hud {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+#status-pill,
+#progress-pill {
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid rgba(113, 149, 212, 0.4);
+  backdrop-filter: blur(7px);
+  font-size: 14px;
+}
+
+#status-pill.lost {
+  border-color: rgba(255, 211, 106, 0.75);
+  color: var(--warning);
+}
+
+#labels-layer,
+#stamp-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+}
+
+#labels-layer {
+  pointer-events: none;
+}
+
+.planet-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 9px 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(149, 179, 240, 0.85);
+  background: var(--chip);
+  color: var(--text);
+  font-weight: 700;
+  font-size: clamp(12px, 2.2vw, 15px);
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  box-shadow: 0 8px 20px rgba(0, 6, 18, 0.45);
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.planet-label.dragging {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.08);
+  z-index: 40;
+}
+
+.planet-label.locked {
+  border-color: rgba(44, 212, 122, 0.95);
+  background: rgba(9, 72, 43, 0.8);
+}
+
+.planet-label.incorrect {
+  animation: shake 280ms ease;
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(-50%, -50%) translateX(0);
+  }
+  25% {
+    transform: translate(-50%, -50%) translateX(-7px);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateX(7px);
+  }
+  100% {
+    transform: translate(-50%, -50%) translateX(0);
+  }
+}
+
+.stamp {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(0.2);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 4px solid var(--ok);
+  color: var(--ok);
+  font-size: 30px;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  background: rgba(11, 49, 25, 0.6);
+  animation: stamp-pop 650ms ease forwards;
+}
+
+@keyframes stamp-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2) rotate(-22deg);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15) rotate(5deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+}
+
+#completion-modal {
+  position: fixed;
+  inset: 8% 6%;
+  z-index: 60;
+  border-radius: 18px;
+  background: rgba(3, 10, 26, 0.92);
+  border: 1px solid rgba(122, 158, 219, 0.62);
+  padding: 22px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 12px;
+  text-align: center;
+  backdrop-filter: blur(14px);
+}
+
+#completion-modal[hidden] {
+  display: none;
+}
+
+#completion-modal h1 {
+  margin: 0;
+  font-size: clamp(22px, 4.8vw, 32px);
+}
+
+#completion-message {
+  margin: 0;
+  color: var(--text-subtle);
+  line-height: 1.4;
+  font-size: clamp(15px, 2.9vw, 19px);
+}
+
+#nft-figure {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+#nft-figure[hidden] {
+  display: none;
+}
+
+#nft-image {
+  width: min(84vw, 320px);
+  max-height: 38vh;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(154, 189, 245, 0.58);
+}
+
+#nft-figure figcaption {
+  color: var(--text-subtle);
+  font-size: 14px;
+}
+
+#action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+#action-buttons[hidden] {
+  display: none;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  min-width: 160px;
+  min-height: 46px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#retry-btn {
+  background: #2c66c6;
+  color: #f4f8ff;
+}
+
+#close-btn {
+  background: #2b3448;
+  color: #f4f8ff;
+}
+
+@media (max-width: 768px) {
+  #hud {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #completion-modal {
+    inset: 5% 4%;
+    padding: 16px;
+  }
+
+  #action-buttons {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+  }
+}
