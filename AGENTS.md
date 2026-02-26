@@ -9,16 +9,23 @@ This repository is a Vite-based web AR game for iPhone/iPad-first usage.
 - `src/game/`: state and drag/drop interaction logic.
 - `src/ui/`: overlay rendering (status, labels, modal, stamps).
 - `src/nft/`: random NFT selection and local gallery persistence.
-- `scripts/compile-target.mjs`: compiles `logo-eight-academy.png` into a `.mind` marker.
+- `scripts/compile-target.mjs`: compiles the active marker image into a `.mind` target.
+- `scripts/generate-tech-marker.mjs`: generates the technical high-contrast AR marker.
+- `scripts/dev-remote.mjs`: runs Vite + Cloudflare tunnel with HTTP Basic Auth.
+- `scripts/sync-vendor.mjs`: syncs local vendor JS (`aframe`, `mindar`) into `public/vendor/`.
 - `assets/targets/`: generated marker files used by MindAR.
-- `nfts/`: NFT images shown after success.
+- `assets/markers/`: marker images/documents.
+- `assets/nfts/`: NFT images shown after success.
+- `public/vendor/`: local copies of runtime AR libraries (no CDN dependency).
 
 ## Build, Test, and Development Commands
 - `npm install`: install dependencies.
-- `npm run compile:target`: generate `assets/targets/logo-eight-academy.mind`.
-- `npm run dev`: run local dev server.
-- `npm run dev:host`: run dev server on `0.0.0.0:5173` for LAN testing.
-- `npm run tunnel`: expose local server via LocalTunnel (HTTPS).
+- `npm run vendor:sync`: sync vendor JS from `node_modules` to `public/vendor`.
+- `npm run compile:target`: generate marker target (`assets/targets/*.mind`) from current marker source.
+- `npm run dev`: run local dev server (includes vendor sync).
+- `npm run dev:host`: run dev server on `0.0.0.0:5173` for LAN testing (includes vendor sync).
+- `npm run dev:remote`: run dev server + HTTPS Cloudflare tunnel with auth.
+- `npm run tunnel`: alias of `npm run dev:remote`.
 - `npm run build`: production build into `dist/`.
 - `npm run preview`: serve the built app from `dist/`.
 
@@ -45,7 +52,7 @@ Minimum validation before PR:
 ## Commit & Pull Request Guidelines
 Use this commit message format for all application changes:
 - `[Modelo]: Descripción`
-- Example: `[Codex-5.3]: Implementa validación de drag and drop`
+- Example: `[Codex-GPT5]: Implementa validación de drag and drop`
 
 PRs should include:
 - Clear summary and scope.
@@ -55,8 +62,10 @@ PRs should include:
 
 ## Agent-Specific Instruction
 - Every time an agent changes app code or assets, it must create a commit in the same session using the format `[Modelo]: Descripción`.
+- When a user requests tunnel password conventions, preserve the agreed credentials unless explicitly changed by the user.
+- Do not include unrelated local changes in commits (for example `prompts.md` edits made outside feature scope).
 
 ## Security & Configuration Notes
-- Do not commit secrets or private tunnel credentials.
+- Tunnel uses HTTP Basic Auth in `dev-remote`; keep credentials configurable via env vars.
 - Large generated folders (`dist/`, `node_modules/`) should stay untracked.
-- If marker source changes (`logo-eight-academy.png`), re-run `npm run compile:target`.
+- If marker source changes, regenerate target with `npm run compile:target`.
