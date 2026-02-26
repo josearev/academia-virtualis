@@ -84,8 +84,13 @@ body {
   pointer-events: auto;
 }
 
+#stamp-layer {
+  pointer-events: none;
+}
+
 .planet-label {
   position: absolute;
+  width: fit-content;
   transform: translate(-50%, -50%);
   padding: 9px 13px;
   border-radius: 12px;
