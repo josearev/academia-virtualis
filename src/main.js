@@ -113,6 +113,16 @@ const setGateStatus = (text) => {
   overlay.setStatus(text, false);
 };
 
+const hideCameraGate = () => {
+  cameraGate.hidden = true;
+  cameraGate.classList.add("hidden");
+};
+
+const showCameraGate = () => {
+  cameraGate.hidden = false;
+  cameraGate.classList.remove("hidden");
+};
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const randomBetween = (min, max) => Math.random() * (max - min) + min;
@@ -587,7 +597,7 @@ const updateLoop = (timeMs) => {
 sceneEl.addEventListener("arReady", () => {
   arStarted = true;
   startInProgress = false;
-  cameraGate.classList.add("hidden");
+  hideCameraGate();
   logStartup("Motor AR activo.");
   overlay.setStatus("Buscando marcador. Apunta la cámara al marcador AR técnico.", false);
   scheduleIosResizes();
@@ -596,6 +606,7 @@ sceneEl.addEventListener("arReady", () => {
 sceneEl.addEventListener("arError", (event) => {
   arStarted = false;
   startInProgress = false;
+  showCameraGate();
   startArButton.disabled = false;
   const errorCode = event?.detail?.error || "ERROR_DESCONOCIDO";
   setGateStatus("No fue posible acceder a la cámara. Revisa permisos e intenta nuevamente.");
@@ -660,6 +671,7 @@ const startAr = async ({ manual = false } = {}) => {
   }
 
   if (!isCameraContextAllowed()) {
+    showCameraGate();
     setGateStatus(INSECURE_CONTEXT_TEXT);
     startArButton.disabled = true;
     logStartup("Bloqueado por contexto inseguro.");
@@ -667,6 +679,7 @@ const startAr = async ({ manual = false } = {}) => {
   }
 
   if (!hasCameraApi()) {
+    showCameraGate();
     setGateStatus("Este navegador no expone la API de camara requerida para AR.");
     startArButton.disabled = true;
     logStartup("navigator.mediaDevices no disponible.");
@@ -685,9 +698,15 @@ const startAr = async ({ manual = false } = {}) => {
     logStartup("Motor AR detectado, iniciando stream de camara.");
 
     await arSystem.start();
+    arStarted = true;
+    startInProgress = false;
+    hideCameraGate();
+    logStartup("Camara AR iniciada.");
+    overlay.setStatus("Buscando marcador. Apunta la cámara al marcador AR técnico.", false);
     scheduleIosResizes();
   } catch (error) {
     startInProgress = false;
+    showCameraGate();
     startArButton.disabled = false;
     const message = error?.message || "No se pudo inicializar AR.";
     setGateStatus(
@@ -809,14 +828,18 @@ window.addEventListener("pointerup", onPointerUp, { passive: true });
 window.addEventListener("pointercancel", onPointerUp, { passive: true });
 
 if (!isCameraContextAllowed()) {
+  showCameraGate();
   setGateStatus(INSECURE_CONTEXT_TEXT);
   startArButton.disabled = true;
   logStartup("Usa URL HTTPS para habilitar camara en iOS.");
 } else if (!hasCameraApi()) {
+  showCameraGate();
   setGateStatus("Este navegador no expone la API de camara requerida para AR.");
   startArButton.disabled = true;
   logStartup("navigator.mediaDevices no disponible.");
 } else {
+  showCameraGate();
+  startArButton.disabled = false;
   setGateStatus(APP_CONFIG.autoStartStatusText);
   window.setTimeout(() => {
     void startAr();
