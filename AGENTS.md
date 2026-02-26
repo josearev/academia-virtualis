@@ -64,6 +64,7 @@ PRs should include:
 - Every time an agent changes app code or assets, it must create a commit in the same session using the format `[Modelo]: Descripción`.
 - When a user requests tunnel password conventions, preserve the agreed credentials unless explicitly changed by the user.
 - Do not include unrelated local changes in commits (for example `prompts.md` edits made outside feature scope).
+- `prompts.md` is user-owned and must not be edited by agents; use `directivas.md` for agent-maintained session directives.
 
 ## Security & Configuration Notes
 - Tunnel uses HTTP Basic Auth in `dev-remote`; keep credentials configurable via env vars.
