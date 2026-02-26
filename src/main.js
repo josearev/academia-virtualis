@@ -48,6 +48,10 @@ const zoomRange = document.querySelector("#zoom-range");
 const zoomValue = document.querySelector("#zoom-value");
 const orbitRange = document.querySelector("#orbit-range");
 const orbitValue = document.querySelector("#orbit-value");
+const planetRange = document.querySelector("#planet-range");
+const planetValue = document.querySelector("#planet-value");
+const speedRange = document.querySelector("#speed-range");
+const speedValue = document.querySelector("#speed-value");
 const debugHud = document.querySelector("#debug-hud");
 
 const solarScene = createSolarSystemScene({
@@ -200,12 +204,50 @@ const applyOrbitScale = (nextScale) => {
   return applied;
 };
 
+const { min: minPlanetScale, max: maxPlanetScale, initial: initialPlanetScale } = solarScene.getPlanetScaleRange();
+
+planetRange.min = String(minPlanetScale);
+planetRange.max = String(maxPlanetScale);
+planetRange.value = String(initialPlanetScale);
+
+const updatePlanetUi = (scale) => {
+  const fixed = scale.toFixed(2);
+  planetRange.value = fixed;
+  planetValue.textContent = `${fixed}x`;
+};
+
+const applyPlanetScale = (nextScale) => {
+  const applied = solarScene.setPlanetScale(nextScale);
+  updatePlanetUi(applied);
+  return applied;
+};
+
+const { min: minSpeedScale, max: maxSpeedScale, initial: initialSpeedScale } = solarScene.getOrbitSpeedRange();
+
+speedRange.min = String(minSpeedScale);
+speedRange.max = String(maxSpeedScale);
+speedRange.value = String(initialSpeedScale);
+
+const updateSpeedUi = (scale) => {
+  const fixed = scale.toFixed(2);
+  speedRange.value = fixed;
+  speedValue.textContent = `${fixed}x`;
+};
+
+const applyOrbitSpeed = (nextScale) => {
+  const applied = solarScene.setOrbitSpeed(nextScale);
+  updateSpeedUi(applied);
+  return applied;
+};
+
 const pointerDistance = ([first, second]) => {
   return Math.hypot(first.x - second.x, first.y - second.y);
 };
 
 applySolarScale(initialScale);
 applyOrbitScale(initialOrbitScale);
+applyPlanetScale(initialPlanetScale);
+applyOrbitSpeed(initialSpeedScale);
 
 const dragController = createDragController({
   canDrag: (labelId) => {
@@ -223,6 +265,7 @@ const dragController = createDragController({
     label.dragging = true;
     label.pointerX = x;
     label.pointerY = y;
+    solarScene.setOrbitPaused(true);
     console.log(`[drag] START ${labelId} @ (${x}, ${y})`);
   },
   onDragMove: (labelId, x, y) => {
@@ -241,6 +284,7 @@ const dragController = createDragController({
 
     activeDragLabel = null;
     label.dragging = false;
+    solarScene.setOrbitPaused(false);
     console.log(`[drag] END ${labelId} @ (${x}, ${y})`)
 
     if (x === null || y === null || !gameState.markerVisible || gameState.completed) {
@@ -258,11 +302,21 @@ const dragController = createDragController({
         return;
       }
 
+      const oldDisplayPlanetId = label.displayPlanetId;
+
+      const displacedLabel = gameState.labels.find(
+        (l) => l !== label && !l.locked && !l.dragging && l.displayPlanetId === label.id
+      );
+
       label.locked = true;
       label.displayPlanetId = label.id;
       gameState.correctCount += 1;
       overlay.showStamp(nearest.x, nearest.y);
       overlay.setProgress(gameState.correctCount, gameState.totalCount);
+
+      if (displacedLabel) {
+        displacedLabel.displayPlanetId = oldDisplayPlanetId;
+      }
 
       if (gameState.correctCount === gameState.totalCount) {
         completeActivity();
@@ -408,6 +462,14 @@ const onOrbitSliderInput = (event) => {
   applyOrbitScale(Number(event.currentTarget.value));
 };
 
+const onPlanetSliderInput = (event) => {
+  applyPlanetScale(Number(event.currentTarget.value));
+};
+
+const onSpeedSliderInput = (event) => {
+  applyOrbitSpeed(Number(event.currentTarget.value));
+};
+
 const onPointerDown = (event) => {
   if (event.pointerType !== "touch" || !gameState.markerVisible || gameState.completed) {
     return;
@@ -465,6 +527,8 @@ syncArViewport();
 startArButton.addEventListener("click", startAr);
 zoomRange.addEventListener("input", onZoomSliderInput);
 orbitRange.addEventListener("input", onOrbitSliderInput);
+planetRange.addEventListener("input", onPlanetSliderInput);
+speedRange.addEventListener("input", onSpeedSliderInput);
 window.addEventListener("resize", scheduleIosResizes);
 window.addEventListener("orientationchange", scheduleIosResizes);
 window.addEventListener("pointerdown", onPointerDown, { passive: true });

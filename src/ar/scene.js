@@ -7,9 +7,15 @@ const DEFAULT_ZOOM_SCALE = 1.2;
 const ORBIT_SPEED_SCALE = 0.25;
 const CORE_PLANETS = ["mercurio", "venus", "tierra", "marte"];
 const CORE_TARGET_WIDTH = 0.34;
-const MIN_ORBIT_SCALE = 0.4;
-const MAX_ORBIT_SCALE = 3.0;
+const MIN_ORBIT_SCALE = 2.0;
+const MAX_ORBIT_SCALE = 5.0;
 const DEFAULT_ORBIT_SCALE = 2.5;
+const MIN_PLANET_SCALE = 0.5;
+const MAX_PLANET_SCALE = 3.0;
+const DEFAULT_PLANET_SCALE = 1.0;
+const MIN_SPEED_SCALE = 0;
+const MAX_SPEED_SCALE = 3.0;
+const DEFAULT_SPEED_SCALE = 1.0;
 
 const createPlanetTexture = (three, planetId) => {
   const size = 256;
@@ -249,6 +255,11 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
 
   let currentScale = DEFAULT_ZOOM_SCALE;
   let currentOrbitScale = DEFAULT_ORBIT_SCALE;
+  let currentPlanetScale = DEFAULT_PLANET_SCALE;
+  let currentSpeedScale = DEFAULT_SPEED_SCALE;
+  let virtualTime = 0;
+  let lastRealTime = null;
+  let orbitPaused = false;
 
   const orbitRingsGroup = new three.Group();
   root.add(orbitRingsGroup);
@@ -345,18 +356,24 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
   setOrbitScale(DEFAULT_ORBIT_SCALE); // sincroniza orbitRingsGroup.scale desde el inicio
 
   return {
-    update(timeSeconds) {
-      sun.rotation.y = timeSeconds * 0.28;
+    update(realTimeSeconds) {
+      if (lastRealTime !== null && !orbitPaused) {
+        const delta = realTimeSeconds - lastRealTime;
+        virtualTime += delta * currentSpeedScale;
+      }
+      lastRealTime = realTimeSeconds;
+
+      sun.rotation.y = virtualTime * 0.28;
 
       planetNodes.forEach((node) => {
         node.orbitPivot.rotation.y =
-          timeSeconds * node.data.orbitSpeed * node.data.speedFactor * ORBIT_SPEED_SCALE
+          virtualTime * node.data.orbitSpeed * node.data.speedFactor * ORBIT_SPEED_SCALE
           + node.phaseOffset;
-        node.mesh.rotation.y = timeSeconds * 1.2;
-        if (node.ring) {
-          node.ring.rotation.y = -(timeSeconds * 1.2);
-        }
+        node.mesh.rotation.y = virtualTime * 1.2;
       });
+    },
+    setOrbitPaused(paused) {
+      orbitPaused = paused;
     },
     getScreenPositions(camera, viewportWidth, viewportHeight) {
       const positions = {};
@@ -393,6 +410,29 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
     },
     getOrbitScaleRange() {
       return { min: MIN_ORBIT_SCALE, max: MAX_ORBIT_SCALE, initial: DEFAULT_ORBIT_SCALE };
+    },
+    setPlanetScale(scale) {
+      currentPlanetScale = Math.min(MAX_PLANET_SCALE, Math.max(MIN_PLANET_SCALE, scale));
+      planetNodes.forEach((node) => {
+        node.mesh.scale.setScalar(currentPlanetScale);
+      });
+      return currentPlanetScale;
+    },
+    getPlanetScale() {
+      return currentPlanetScale;
+    },
+    getPlanetScaleRange() {
+      return { min: MIN_PLANET_SCALE, max: MAX_PLANET_SCALE, initial: DEFAULT_PLANET_SCALE };
+    },
+    setOrbitSpeed(scale) {
+      currentSpeedScale = Math.min(MAX_SPEED_SCALE, Math.max(MIN_SPEED_SCALE, scale));
+      return currentSpeedScale;
+    },
+    getOrbitSpeed() {
+      return currentSpeedScale;
+    },
+    getOrbitSpeedRange() {
+      return { min: MIN_SPEED_SCALE, max: MAX_SPEED_SCALE, initial: DEFAULT_SPEED_SCALE };
     },
     fitCorePlanetsToMarker
   };
