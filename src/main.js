@@ -7,13 +7,16 @@ import { createOverlay } from "./ui/overlay.js";
 const SUCCESS_TEXT =
   "Felicidades! Has completado la actividad. Ahora has ganado 1 NFT que será guardado en tu NFT gallery";
 const RETURN_URL = "https://xerticagrupoacererobdr.my.canva.site/c1fncgdhef8bcwqy";
+const APP_VERSION = "0.10";
 const SNAP_DISTANCE = 100;
 const COMPLETION_COUNTDOWN_SECONDS = 5;
+const CONFETTI_DURATION_MS = COMPLETION_COUNTDOWN_SECONDS * 1000;
 const MINDAR_WAIT_TIMEOUT_MS = 12000;
 const MINDAR_POLL_INTERVAL_MS = 120;
 const IOS_RESIZE_DELAYS_MS = [0, 120, 320, 650];
 const INSECURE_CONTEXT_TEXT =
   "Camara bloqueada por navegador: abre este sitio en HTTPS para usar AR en iPhone/iPad.";
+const CONFETTI_COLORS = ["#ffde59", "#ff6b6b", "#4ecdc4", "#7f5af0", "#58a6ff", "#ff9f1c"];
 const LABEL_OFFSET_BY_PLANET_ID = {
   mercurio: 30,
   venus: 34,
@@ -36,7 +39,7 @@ const overlay = createOverlay({
 });
 
 overlay.setProgress(gameState.correctCount, gameState.totalCount);
-overlay.setStatus("Presiona 'Iniciar camara AR' para continuar.", false);
+overlay.setStatus("Iniciando camara AR automaticamente...", false);
 
 const sceneEl = document.querySelector("#ar-scene");
 const targetEl = document.querySelector("#target-root");
@@ -54,6 +57,8 @@ const planetValue = document.querySelector("#planet-value");
 const speedRange = document.querySelector("#speed-range");
 const speedValue = document.querySelector("#speed-value");
 const debugHud = document.querySelector("#debug-hud");
+const versionCounter = document.querySelector("#version-counter");
+const confettiLayer = document.querySelector("#confetti-layer");
 
 const solarScene = createSolarSystemScene({
   targetEl,
@@ -64,6 +69,9 @@ let arCamera = null;
 let latestPositions = {};
 let completionTimerId = null;
 let completionCountdownIntervalId = null;
+let confettiAnimationId = null;
+let confettiStopTimerId = null;
+let confettiPieces = [];
 let arStarted = false;
 let startInProgress = false;
 let dragLockedByCompletion = false;
@@ -72,6 +80,11 @@ let pinchStartDistance = 0;
 let pinchStartScale = 1;
 let activeDragLabel = null;
 const pinchPointers = new Map();
+const confettiCtx = confettiLayer?.getContext("2d");
+
+if (versionCounter) {
+  versionCounter.textContent = `v${APP_VERSION}`;
+}
 
 const logStartup = (text) => {
   cameraDebug.textContent = text;
@@ -83,6 +96,121 @@ const setGateStatus = (text) => {
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const randomBetween = (min, max) => Math.random() * (max - min) + min;
+
+const resizeConfettiLayer = () => {
+  if (!confettiLayer || !confettiCtx) {
+    return;
+  }
+
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const dpr = window.devicePixelRatio || 1;
+  confettiLayer.width = Math.floor(width * dpr);
+  confettiLayer.height = Math.floor(height * dpr);
+  confettiLayer.style.width = `${width}px`;
+  confettiLayer.style.height = `${height}px`;
+  confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+};
+
+const createConfettiPiece = (startAtTop = true) => {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  return {
+    x: randomBetween(0, width),
+    y: startAtTop ? randomBetween(-height, -10) : randomBetween(0, height),
+    vx: randomBetween(-80, 80),
+    vy: randomBetween(120, 260),
+    gravity: randomBetween(240, 420),
+    rotation: randomBetween(0, Math.PI * 2),
+    spin: randomBetween(-8, 8),
+    size: randomBetween(5, 10),
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    opacity: randomBetween(0.75, 1)
+  };
+};
+
+const recycleConfettiPiece = (piece) => {
+  const recycled = createConfettiPiece(true);
+  piece.x = recycled.x;
+  piece.y = recycled.y;
+  piece.vx = recycled.vx;
+  piece.vy = recycled.vy;
+  piece.gravity = recycled.gravity;
+  piece.rotation = recycled.rotation;
+  piece.spin = recycled.spin;
+  piece.size = recycled.size;
+  piece.color = recycled.color;
+  piece.opacity = recycled.opacity;
+};
+
+const stopConfettiAnimation = () => {
+  if (confettiAnimationId) {
+    cancelAnimationFrame(confettiAnimationId);
+    confettiAnimationId = null;
+  }
+  if (confettiStopTimerId) {
+    clearTimeout(confettiStopTimerId);
+    confettiStopTimerId = null;
+  }
+  if (confettiCtx && confettiLayer) {
+    confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    confettiLayer.hidden = true;
+  }
+  confettiPieces = [];
+};
+
+const startConfettiAnimation = (durationMs = CONFETTI_DURATION_MS) => {
+  if (!confettiLayer || !confettiCtx) {
+    return;
+  }
+
+  stopConfettiAnimation();
+  resizeConfettiLayer();
+  confettiLayer.hidden = false;
+  const pieceCount = Math.min(180, Math.max(90, Math.floor(window.innerWidth * 0.16)));
+  confettiPieces = Array.from({ length: pieceCount }, () => createConfettiPiece(true));
+
+  let lastTime = performance.now();
+  const animate = (now) => {
+    const deltaSec = Math.min(0.033, (now - lastTime) / 1000);
+    lastTime = now;
+    confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    confettiPieces.forEach((piece) => {
+      piece.vy += piece.gravity * deltaSec;
+      piece.x += piece.vx * deltaSec;
+      piece.y += piece.vy * deltaSec;
+      piece.rotation += piece.spin * deltaSec;
+
+      const outOfBounds =
+        piece.y - piece.size > window.innerHeight
+        || piece.x < -piece.size * 2
+        || piece.x > window.innerWidth + piece.size * 2;
+
+      if (outOfBounds) {
+        recycleConfettiPiece(piece);
+      }
+
+      confettiCtx.save();
+      confettiCtx.translate(piece.x, piece.y);
+      confettiCtx.rotate(piece.rotation);
+      confettiCtx.globalAlpha = piece.opacity;
+      confettiCtx.fillStyle = piece.color;
+      confettiCtx.fillRect(-piece.size * 0.5, -piece.size * 0.5, piece.size, piece.size * 0.6);
+      confettiCtx.restore();
+    });
+
+    confettiAnimationId = requestAnimationFrame(animate);
+  };
+
+  confettiAnimationId = requestAnimationFrame(animate);
+  confettiStopTimerId = window.setTimeout(() => {
+    stopConfettiAnimation();
+  }, durationMs);
+};
 
 const waitForSceneLoad = async (timeoutMs = MINDAR_WAIT_TIMEOUT_MS) => {
   if (sceneEl.hasLoaded) {
@@ -412,7 +540,7 @@ const hasCameraApi = () => {
   return Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 };
 
-const startAr = async () => {
+const startAr = async ({ manual = false } = {}) => {
   if (arStarted || startInProgress) {
     return;
   }
@@ -448,7 +576,11 @@ const startAr = async () => {
     startInProgress = false;
     startArButton.disabled = false;
     const message = error?.message || "No se pudo inicializar AR.";
-    setGateStatus("No se pudo iniciar AR. Toca de nuevo 'Iniciar camara AR'.");
+    setGateStatus(
+      manual
+        ? "No se pudo iniciar AR. Toca de nuevo 'Iniciar camara AR'."
+        : "No se pudo iniciar AR automaticamente. Toca 'Iniciar camara AR'."
+    );
     logStartup(message);
   }
 };
@@ -524,13 +656,21 @@ const onPointerUp = (event) => {
 };
 
 syncArViewport();
-startArButton.addEventListener("click", startAr);
+startArButton.addEventListener("click", () => {
+  void startAr({ manual: true });
+});
 zoomRange.addEventListener("input", onZoomSliderInput);
 orbitRange.addEventListener("input", onOrbitSliderInput);
 planetRange.addEventListener("input", onPlanetSliderInput);
 speedRange.addEventListener("input", onSpeedSliderInput);
-window.addEventListener("resize", scheduleIosResizes);
-window.addEventListener("orientationchange", scheduleIosResizes);
+window.addEventListener("resize", () => {
+  scheduleIosResizes();
+  resizeConfettiLayer();
+});
+window.addEventListener("orientationchange", () => {
+  scheduleIosResizes();
+  resizeConfettiLayer();
+});
 window.addEventListener("pointerdown", onPointerDown, { passive: true });
 window.addEventListener("pointermove", onPointerMove, { passive: false });
 window.addEventListener("pointerup", onPointerUp, { passive: true });
@@ -548,6 +688,15 @@ if (!isCameraContextAllowed()) {
   setGateStatus(INSECURE_CONTEXT_TEXT);
   startArButton.disabled = true;
   logStartup("Usa URL HTTPS para habilitar camara en iOS.");
+} else if (!hasCameraApi()) {
+  setGateStatus("Este navegador no expone la API de camara requerida para AR.");
+  startArButton.disabled = true;
+  logStartup("navigator.mediaDevices no disponible.");
+} else {
+  setGateStatus("Iniciando camara AR automaticamente...");
+  window.setTimeout(() => {
+    void startAr();
+  }, 120);
 }
 
 const renderLabels = () => {
@@ -646,6 +795,7 @@ const completeActivity = () => {
   gameState.completed = true;
   dragLockedByCompletion = true;
   dragController.setEnabled(false);
+  startConfettiAnimation(CONFETTI_DURATION_MS);
   overlay.showCompletionCountdown(SUCCESS_TEXT, COMPLETION_COUNTDOWN_SECONDS);
 
   let secondsLeft = COMPLETION_COUNTDOWN_SECONDS;
@@ -679,4 +829,5 @@ window.addEventListener("beforeunload", () => {
     clearInterval(completionCountdownIntervalId);
     completionCountdownIntervalId = null;
   }
+  stopConfettiAnimation();
 });

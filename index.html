@@ -30,6 +30,7 @@
 
       <div id="labels-layer" aria-label="Etiquetas de planetas"></div>
       <div id="stamp-layer" aria-hidden="true"></div>
+      <canvas id="confetti-layer" aria-hidden="true" hidden></canvas>
       <section id="zoom-controls" hidden>
         <label for="zoom-range">Zoom sistema solar</label>
         <input id="zoom-range" type="range" min="0.8" max="5" step="0.01" value="1.2" />
@@ -47,12 +48,13 @@
 
       <section id="camera-gate">
         <h2>Actividad AR</h2>
-        <p id="camera-gate-text">Presiona el boton para iniciar la camara y apunta al marcador AR tecnico.</p>
+        <p id="camera-gate-text">Iniciando camara AR automaticamente...</p>
         <button id="start-ar-btn" type="button">Iniciar camara AR</button>
         <p id="camera-debug" aria-live="polite"></p>
       </section>
 
       <div id="debug-hud">M:✗ drag:-- vis:0</div>
+      <div id="version-counter" aria-live="polite"></div>
 
       <section id="completion-modal" class="overlay-modal overlay-modal--countdown" hidden>
         <h1>Actividad completada</h1>

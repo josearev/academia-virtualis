@@ -88,6 +88,15 @@ body {
   pointer-events: none;
 }
 
+#confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
 .planet-label {
   position: absolute;
   width: fit-content;
@@ -193,15 +202,20 @@ body {
 }
 
 .overlay-modal--nft {
-  inset: 8% 6%;
+  top: 50%;
+  left: 50%;
+  width: min(384px, 36vw);
+  min-width: 240px;
+  transform: translate(-50%, -50%);
   grid-template-rows: auto 1fr auto;
-  padding: 22px;
+  padding: 18px;
 }
 
 #camera-gate {
   position: fixed;
-  inset: auto 50% 16px auto;
-  transform: translateX(50%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 58;
   width: min(92vw, 460px);
   background: rgba(3, 10, 26, 0.9);
@@ -315,7 +329,7 @@ body {
 }
 
 #nft-image {
-  width: min(84vw, 320px);
+  width: min(100%, 300px);
   max-height: 38vh;
   object-fit: cover;
   border-radius: 14px;
@@ -372,6 +386,21 @@ button {
   pointer-events: none;
 }
 
+#version-counter {
+  position: fixed;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 61;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-subtle);
+  background: rgba(3, 10, 26, 0.82);
+  border: 1px solid rgba(122, 158, 219, 0.45);
+  pointer-events: none;
+}
+
 @media (max-width: 768px) {
   #hud {
     flex-direction: column;
@@ -384,12 +413,9 @@ button {
   }
 
   .overlay-modal--nft {
-    inset: 5% 4%;
+    width: min(92vw, 336px);
+    min-width: 0;
     padding: 16px;
-  }
-
-  #camera-gate {
-    bottom: max(12px, env(safe-area-inset-bottom));
   }
 
   #zoom-controls {
