@@ -13,7 +13,7 @@
     <div id="app-shell">
       <a-scene
         id="ar-scene"
-        mindar-image="imageTargetSrc: /assets/targets/logo-eight-academy.mind; autoStart: true; maxTrack: 1; uiLoading: no; uiScanning: no;"
+        mindar-image="imageTargetSrc: /assets/targets/logo-eight-academy.mind; autoStart: false; maxTrack: 1; uiLoading: no; uiScanning: no;"
         color-space="sRGB"
         renderer="colorManagement: true, physicallyCorrectLights"
         vr-mode-ui="enabled: false"
@@ -31,6 +31,12 @@
 
       <div id="labels-layer" aria-label="Etiquetas de planetas"></div>
       <div id="stamp-layer" aria-hidden="true"></div>
+
+      <section id="camera-gate">
+        <h2>Actividad AR</h2>
+        <p id="camera-gate-text">Presiona el boton para iniciar la camara.</p>
+        <button id="start-ar-btn" type="button">Iniciar camara AR</button>
+      </section>
 
       <section id="completion-modal" hidden>
         <h1>Actividad completada</h1>

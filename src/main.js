@@ -8,6 +8,8 @@ const SUCCESS_TEXT =
   "Felicidades! Has completado la actividad. Ahora has ganado 1 NFT que será guardado en tu NFT gallery";
 const RETURN_URL = "https://xerticagrupoacererobdr.my.canva.site/c1fncgdhef8bcwqy";
 const SNAP_DISTANCE = 86;
+const INSECURE_CONTEXT_TEXT =
+  "Camara bloqueada por navegador: abre este sitio en HTTPS (por ejemplo con localtunnel) para usar AR en iPhone/iPad.";
 
 const gameState = createGameState();
 const overlay = createOverlay({
@@ -19,10 +21,13 @@ const overlay = createOverlay({
 });
 
 overlay.setProgress(gameState.correctCount, gameState.totalCount);
-overlay.setStatus("Solicitando permisos de cámara...", false);
+overlay.setStatus("Presiona 'Iniciar camara AR' para continuar.", false);
 
 const sceneEl = document.querySelector("#ar-scene");
 const targetEl = document.querySelector("#target-root");
+const cameraGate = document.querySelector("#camera-gate");
+const cameraGateText = document.querySelector("#camera-gate-text");
+const startArButton = document.querySelector("#start-ar-btn");
 
 const solarScene = createSolarSystemScene({
   targetEl,
@@ -32,7 +37,7 @@ const solarScene = createSolarSystemScene({
 let arCamera = null;
 let latestPositions = {};
 let completionTimerId = null;
-let nftTimerId = null;
+let arStarted = false;
 
 const dragController = createDragController({
   canDrag: (labelId) => {
@@ -113,10 +118,12 @@ const updateLoop = (timeMs) => {
 };
 
 sceneEl.addEventListener("arReady", () => {
+  cameraGate.classList.add("hidden");
   overlay.setStatus("Buscando marcador. Apunta la cámara al logo de Eight Academy.", false);
 });
 
 sceneEl.addEventListener("arError", () => {
+  startArButton.disabled = false;
   overlay.setStatus("No fue posible acceder a la cámara. Revisa permisos e intenta nuevamente.", false);
 });
 
@@ -134,6 +141,54 @@ sceneEl.addEventListener("renderstart", () => {
   arCamera = sceneEl.camera;
   window.requestAnimationFrame(updateLoop);
 });
+
+const isCameraContextAllowed = () => {
+  if (window.isSecureContext) {
+    return true;
+  }
+  return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+};
+
+const startAr = async () => {
+  if (arStarted) {
+    return;
+  }
+
+  if (!isCameraContextAllowed()) {
+    cameraGateText.textContent = INSECURE_CONTEXT_TEXT;
+    overlay.setStatus(INSECURE_CONTEXT_TEXT, false);
+    startArButton.disabled = true;
+    return;
+  }
+
+  const arSystem = sceneEl.systems["mindar-image-system"];
+  if (!arSystem) {
+    overlay.setStatus("Cargando motor AR... intenta nuevamente en 1 segundo.", false);
+    return;
+  }
+
+  startArButton.disabled = true;
+  cameraGateText.textContent = "Permite el acceso a la camara cuando el navegador lo solicite.";
+  overlay.setStatus("Solicitando permisos de cámara...", false);
+
+  try {
+    await arSystem.start();
+    arStarted = true;
+    cameraGate.classList.add("hidden");
+  } catch (error) {
+    startArButton.disabled = false;
+    cameraGateText.textContent = "No se pudo abrir la camara. Verifica permisos y vuelve a intentar.";
+    overlay.setStatus("No se pudo abrir la cámara. Toca de nuevo 'Iniciar camara AR'.", false);
+  }
+};
+
+startArButton.addEventListener("click", startAr);
+
+if (!isCameraContextAllowed()) {
+  cameraGateText.textContent = INSECURE_CONTEXT_TEXT;
+  overlay.setStatus(INSECURE_CONTEXT_TEXT, false);
+  startArButton.disabled = true;
+}
 
 const renderLabels = () => {
   gameState.labels.forEach((label) => {
@@ -197,8 +252,5 @@ const completeActivity = () => {
 window.addEventListener("beforeunload", () => {
   if (completionTimerId) {
     clearTimeout(completionTimerId);
-  }
-  if (nftTimerId) {
-    clearTimeout(nftTimerId);
   }
 });
