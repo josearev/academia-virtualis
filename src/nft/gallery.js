@@ -1,6 +1,6 @@
 const STORAGE_KEY = "academia_virtualis_gallery_v1";
 
-const NFT_POOL = Array.from({ length: 10 }, (_, index) => `/nfts/NFT-SistemaSolar-${index + 1}.png`);
+const NFT_POOL = Array.from({ length: 10 }, (_, index) => `/assets/nfts/NFT-SistemaSolar-${index + 1}.png`);
 
 const readStorage = () => {
   try {

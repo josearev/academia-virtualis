@@ -1,7 +1,10 @@
-const SYSTEM_SCALE = 0.44;
-const ORBIT_SCALE = 0.42;
-const PLANET_SCALE = 0.92;
-const SUN_SCALE = 0.74;
+const BASE_SYSTEM_SCALE = 0.9;
+const ORBIT_SCALE = 0.62;
+const PLANET_SCALE = 1.35;
+const SUN_SCALE = 0.84;
+const MIN_ZOOM_SCALE = 0.8;
+const MAX_ZOOM_SCALE = 2.6;
+const DEFAULT_ZOOM_SCALE = 1.2;
 
 const createPlanetMesh = (three, planet) => {
   const geometry = new three.SphereGeometry(planet.radius * PLANET_SCALE, 32, 24);
@@ -20,8 +23,9 @@ const createPlanetMesh = (three, planet) => {
 export const createSolarSystemScene = ({ targetEl, planets }) => {
   const three = window.AFRAME.THREE;
   const root = new three.Group();
-  const sunLight = new three.PointLight(0xffd17c, 2.3, 2.2);
-  const ambientLight = new three.AmbientLight(0xbccfff, 0.72);
+  const sunLight = new three.PointLight(0xffd17c, 2.45, 2.35);
+  const ambientLight = new three.AmbientLight(0xbccfff, 0.9);
+  let currentScale = DEFAULT_ZOOM_SCALE;
 
   const sun = new three.Mesh(
     new three.SphereGeometry(0.09 * SUN_SCALE, 36, 28),
@@ -37,8 +41,8 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
   root.add(sun);
   root.add(sunLight);
   root.add(ambientLight);
-  root.scale.setScalar(SYSTEM_SCALE);
-  root.position.set(0, -0.005, 0.04);
+  root.scale.setScalar(BASE_SYSTEM_SCALE * currentScale);
+  root.position.set(0, 0.004, 0.055);
   root.rotation.x = -0.09;
 
   const byId = new Map();
@@ -67,6 +71,8 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
   });
 
   targetEl.object3D.add(root);
+
+  const clampScale = (scale) => Math.min(MAX_ZOOM_SCALE, Math.max(MIN_ZOOM_SCALE, scale));
 
   return {
     update(timeSeconds) {
@@ -98,6 +104,17 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
       });
 
       return positions;
+    },
+    setScale(scale) {
+      currentScale = clampScale(scale);
+      root.scale.setScalar(BASE_SYSTEM_SCALE * currentScale);
+      return currentScale;
+    },
+    getScale() {
+      return currentScale;
+    },
+    getScaleRange() {
+      return { min: MIN_ZOOM_SCALE, max: MAX_ZOOM_SCALE, initial: DEFAULT_ZOOM_SCALE };
     }
   };
 };

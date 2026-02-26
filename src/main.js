@@ -33,6 +33,9 @@ const cameraGate = document.querySelector("#camera-gate");
 const cameraGateText = document.querySelector("#camera-gate-text");
 const cameraDebug = document.querySelector("#camera-debug");
 const startArButton = document.querySelector("#start-ar-btn");
+const zoomControls = document.querySelector("#zoom-controls");
+const zoomRange = document.querySelector("#zoom-range");
+const zoomValue = document.querySelector("#zoom-value");
 
 const solarScene = createSolarSystemScene({
   targetEl,
@@ -44,6 +47,11 @@ let latestPositions = {};
 let completionTimerId = null;
 let arStarted = false;
 let startInProgress = false;
+let dragLockedByCompletion = false;
+let pinchActive = false;
+let pinchStartDistance = 0;
+let pinchStartScale = 1;
+const pinchPointers = new Map();
 
 const logStartup = (text) => {
   cameraDebug.textContent = text;
@@ -139,6 +147,32 @@ const scheduleIosResizes = () => {
     window.setTimeout(requestArResize, delayMs);
   });
 };
+
+const { min: minScale, max: maxScale, initial: initialScale } = solarScene.getScaleRange();
+
+zoomRange.min = String(minScale);
+zoomRange.max = String(maxScale);
+zoomRange.value = String(initialScale);
+
+const clampScale = (scale) => Math.min(maxScale, Math.max(minScale, scale));
+
+const updateZoomUi = (scale) => {
+  const fixed = scale.toFixed(2);
+  zoomRange.value = fixed;
+  zoomValue.textContent = `${fixed}x`;
+};
+
+const applySolarScale = (nextScale) => {
+  const applied = solarScene.setScale(clampScale(nextScale));
+  updateZoomUi(applied);
+  return applied;
+};
+
+const pointerDistance = ([first, second]) => {
+  return Math.hypot(first.x - second.x, first.y - second.y);
+};
+
+applySolarScale(initialScale);
 
 const dragController = createDragController({
   canDrag: (labelId) => {
@@ -239,12 +273,19 @@ sceneEl.addEventListener("arError", (event) => {
 targetEl.addEventListener("targetFound", () => {
   gameState.markerVisible = true;
   overlay.setDefaultStatus(true);
+  zoomControls.hidden = false;
   scheduleIosResizes();
 });
 
 targetEl.addEventListener("targetLost", () => {
   gameState.markerVisible = false;
   overlay.setDefaultStatus(false);
+  zoomControls.hidden = true;
+  pinchActive = false;
+  pinchPointers.clear();
+  if (!dragLockedByCompletion) {
+    dragController.setEnabled(true);
+  }
 });
 
 sceneEl.addEventListener("renderstart", () => {
@@ -315,10 +356,73 @@ const startAr = async () => {
   }
 };
 
+const onZoomSliderInput = (event) => {
+  const nextScale = Number(event.currentTarget.value);
+  applySolarScale(nextScale);
+};
+
+const onPointerDown = (event) => {
+  if (event.pointerType !== "touch" || !gameState.markerVisible || gameState.completed) {
+    return;
+  }
+
+  pinchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (pinchPointers.size !== 2) {
+    return;
+  }
+
+  if (gameState.labels.some((label) => label.dragging)) {
+    return;
+  }
+
+  pinchActive = true;
+  const points = [...pinchPointers.values()];
+  pinchStartDistance = pointerDistance(points);
+  pinchStartScale = solarScene.getScale();
+  if (!dragLockedByCompletion) {
+    dragController.setEnabled(false);
+  }
+};
+
+const onPointerMove = (event) => {
+  if (!pinchPointers.has(event.pointerId)) {
+    return;
+  }
+
+  pinchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (!pinchActive || pinchPointers.size < 2 || pinchStartDistance <= 0) {
+    return;
+  }
+
+  event.preventDefault();
+  const points = [...pinchPointers.values()];
+  const ratio = pointerDistance(points) / pinchStartDistance;
+  applySolarScale(pinchStartScale * ratio);
+};
+
+const onPointerUp = (event) => {
+  if (!pinchPointers.has(event.pointerId)) {
+    return;
+  }
+
+  pinchPointers.delete(event.pointerId);
+  if (pinchActive && pinchPointers.size < 2) {
+    pinchActive = false;
+    if (!dragLockedByCompletion) {
+      dragController.setEnabled(true);
+    }
+  }
+};
+
 syncArViewport();
 startArButton.addEventListener("click", startAr);
+zoomRange.addEventListener("input", onZoomSliderInput);
 window.addEventListener("resize", scheduleIosResizes);
 window.addEventListener("orientationchange", scheduleIosResizes);
+window.addEventListener("pointerdown", onPointerDown, { passive: true });
+window.addEventListener("pointermove", onPointerMove, { passive: false });
+window.addEventListener("pointerup", onPointerUp, { passive: true });
+window.addEventListener("pointercancel", onPointerUp, { passive: true });
 
 if (!isCameraContextAllowed()) {
   setGateStatus(INSECURE_CONTEXT_TEXT);
@@ -338,7 +442,8 @@ const renderLabels = () => {
       const anchor = latestPositions[label.displayPlanetId];
       if (anchor && gameState.markerVisible && anchor.visible) {
         const planetData = PLANET_BY_ID.get(label.displayPlanetId);
-        const verticalOffset = planetData ? 34 + planetData.radius * 320 : 44;
+        const zoomFactor = Math.sqrt(solarScene.getScale());
+        const verticalOffset = planetData ? (30 + planetData.radius * 280) * zoomFactor : 42;
         x = anchor.x;
         y = anchor.y - verticalOffset;
         visible = true;
@@ -378,6 +483,7 @@ const completeActivity = () => {
   }
 
   gameState.completed = true;
+  dragLockedByCompletion = true;
   dragController.setEnabled(false);
   overlay.showCompletionMessage(SUCCESS_TEXT);
 
