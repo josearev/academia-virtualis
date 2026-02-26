@@ -6,13 +6,14 @@
     "node": "20.x"
   },
   "scripts": {
-    "build": "npm run vendor:sync && vite build",
+    "assets:sync": "node scripts/sync-runtime-assets.mjs",
+    "build": "npm run vendor:sync && npm run assets:sync && vite build",
     "compile:target": "node scripts/compile-target.mjs",
-    "dev": "npm run vendor:sync && vite",
-    "dev:host": "npm run vendor:sync && vite --host 0.0.0.0 --port 5173",
-    "dev:remote": "npm run vendor:sync && node scripts/dev-remote.mjs",
+    "dev": "npm run vendor:sync && npm run assets:sync && vite",
+    "dev:host": "npm run vendor:sync && npm run assets:sync && vite --host 0.0.0.0 --port 5173",
+    "dev:remote": "npm run vendor:sync && npm run assets:sync && node scripts/dev-remote.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
-    "tunnel": "npm run vendor:sync && node scripts/dev-remote.mjs",
+    "tunnel": "npm run vendor:sync && npm run assets:sync && node scripts/dev-remote.mjs",
     "vendor:sync": "node scripts/sync-vendor.mjs"
   },
   "dependencies": {

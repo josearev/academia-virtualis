@@ -69,6 +69,8 @@ const planetValue = document.querySelector("#planet-value");
 const speedRange = document.querySelector("#speed-range");
 const speedValue = document.querySelector("#speed-value");
 const rotationControls = document.querySelector("#rotation-controls");
+const zoomControlsToggle = document.querySelector("#zoom-controls-toggle");
+const rotationControlsToggle = document.querySelector("#rotation-controls-toggle");
 const rotationXRange = document.querySelector("#rotation-x-range");
 const rotationXValue = document.querySelector("#rotation-x-value");
 const rotationYRange = document.querySelector("#rotation-y-range");
@@ -77,6 +79,7 @@ const rotationZRange = document.querySelector("#rotation-z-range");
 const rotationZValue = document.querySelector("#rotation-z-value");
 const versionCounter = document.querySelector("#version-counter");
 const confettiLayer = document.querySelector("#confetti-layer");
+const mobileControlsQuery = window.matchMedia("(max-width: 768px)");
 
 const solarScene = createSolarSystemScene({
   targetEl,
@@ -97,6 +100,9 @@ let pinchActive = false;
 let pinchStartDistance = 0;
 let pinchStartScale = 1;
 let activeDragLabel = null;
+let zoomControlsCollapsed = mobileControlsQuery.matches;
+let rotationControlsCollapsed = mobileControlsQuery.matches;
+let lastIsMobileViewport = mobileControlsQuery.matches;
 const pinchPointers = new Map();
 const confettiCtx = confettiLayer?.getContext("2d");
 
@@ -121,6 +127,44 @@ const hideCameraGate = () => {
 const showCameraGate = () => {
   cameraGate.hidden = false;
   cameraGate.classList.remove("hidden");
+};
+
+const updatePanelCollapseState = (panelElement, toggleElement, collapsed, expandLabel, collapseLabel) => {
+  if (!panelElement || !toggleElement) {
+    return;
+  }
+  const shouldCollapse = mobileControlsQuery.matches && collapsed;
+  panelElement.classList.toggle("controls-panel--collapsed", shouldCollapse);
+  toggleElement.textContent = shouldCollapse ? ">" : "<";
+  toggleElement.setAttribute("aria-expanded", String(!shouldCollapse));
+  toggleElement.setAttribute("aria-label", shouldCollapse ? expandLabel : collapseLabel);
+};
+
+const syncCollapsedControlsUi = () => {
+  updatePanelCollapseState(
+    zoomControls,
+    zoomControlsToggle,
+    zoomControlsCollapsed,
+    "Expandir controles de zoom",
+    "Colapsar controles de zoom"
+  );
+  updatePanelCollapseState(
+    rotationControls,
+    rotationControlsToggle,
+    rotationControlsCollapsed,
+    "Expandir controles de rotación",
+    "Colapsar controles de rotación"
+  );
+};
+
+const syncViewportControlsMode = () => {
+  const isMobile = mobileControlsQuery.matches;
+  if (isMobile !== lastIsMobileViewport) {
+    zoomControlsCollapsed = isMobile;
+    rotationControlsCollapsed = isMobile;
+    lastIsMobileViewport = isMobile;
+  }
+  syncCollapsedControlsUi();
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -500,6 +544,8 @@ if (rotationControlsEnabled) {
   rotationControls.hidden = true;
 }
 
+syncViewportControlsMode();
+
 const dragController = createDragController({
   canDrag: (labelId) => {
     const label = findLabel(gameState, labelId);
@@ -621,6 +667,7 @@ targetEl.addEventListener("targetFound", () => {
     rotationControls.hidden = false;
   }
 
+  syncCollapsedControlsUi();
   scheduleIosResizes();
 });
 
@@ -805,6 +852,18 @@ syncArViewport();
 startArButton.addEventListener("click", () => {
   void startAr({ manual: true });
 });
+if (zoomControlsToggle) {
+  zoomControlsToggle.addEventListener("click", () => {
+    zoomControlsCollapsed = !zoomControlsCollapsed;
+    syncCollapsedControlsUi();
+  });
+}
+if (rotationControlsToggle) {
+  rotationControlsToggle.addEventListener("click", () => {
+    rotationControlsCollapsed = !rotationControlsCollapsed;
+    syncCollapsedControlsUi();
+  });
+}
 zoomRange.addEventListener("input", onZoomSliderInput);
 orbitRange.addEventListener("input", onOrbitSliderInput);
 planetRange.addEventListener("input", onPlanetSliderInput);
@@ -815,10 +874,12 @@ if (rotationControlsEnabled) {
   rotationZRange.addEventListener("input", onRotationZSliderInput);
 }
 window.addEventListener("resize", () => {
+  syncViewportControlsMode();
   scheduleIosResizes();
   resizeConfettiLayer();
 });
 window.addEventListener("orientationchange", () => {
+  syncViewportControlsMode();
   scheduleIosResizes();
   resizeConfettiLayer();
 });

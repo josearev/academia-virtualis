@@ -227,13 +227,11 @@ body {
   gap: 8px;
 }
 
-#zoom-controls {
+.controls-panel {
   position: fixed;
-  left: max(12px, env(safe-area-inset-left));
-  bottom: max(12px, env(safe-area-inset-bottom));
   z-index: 59;
   width: min(260px, 84vw);
-  padding: 10px 12px;
+  padding: 42px 12px 10px;
   border-radius: 12px;
   background: rgba(3, 10, 26, 0.88);
   border: 1px solid rgba(122, 158, 219, 0.62);
@@ -242,19 +240,30 @@ body {
   pointer-events: auto;
 }
 
+#zoom-controls {
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+}
+
 #rotation-controls {
   position: fixed;
   right: max(12px, env(safe-area-inset-right));
   bottom: max(12px, env(safe-area-inset-bottom));
-  z-index: 59;
-  width: min(260px, 84vw);
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(3, 10, 26, 0.88);
-  border: 1px solid rgba(122, 158, 219, 0.62);
-  display: grid;
-  gap: 8px;
-  pointer-events: auto;
+}
+
+.controls-toggle {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  place-items: center;
+  border: 1px solid rgba(122, 158, 219, 0.72);
+  border-radius: 8px;
+  background: rgba(16, 41, 87, 0.92);
+  color: var(--text);
+  font-weight: 800;
+  line-height: 1;
 }
 
 #zoom-controls[hidden] {
@@ -391,6 +400,15 @@ button {
   cursor: pointer;
 }
 
+.controls-toggle {
+  min-width: 32px;
+  min-height: 32px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 18px;
+}
+
 #retry-btn {
   background: #2c66c6;
   color: #f4f8ff;
@@ -439,13 +457,27 @@ button {
   }
 
   #zoom-controls {
-    width: min(240px, 80vw);
+    left: max(8px, env(safe-area-inset-left));
+    right: auto;
+    width: min(230px, 78vw);
+    transition: transform 180ms ease;
   }
 
   #rotation-controls {
+    left: max(8px, env(safe-area-inset-left));
+    right: auto;
     width: min(220px, 72vw);
     top: calc(max(70px, env(safe-area-inset-top)) + 10px);
     bottom: auto;
+    transition: transform 180ms ease;
+  }
+
+  .controls-toggle {
+    display: grid;
+  }
+
+  .controls-panel--collapsed {
+    transform: translateX(calc(-100% + 44px));
   }
 
   #action-buttons {
