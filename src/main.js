@@ -67,7 +67,6 @@ const planetRange = document.querySelector("#planet-range");
 const planetValue = document.querySelector("#planet-value");
 const speedRange = document.querySelector("#speed-range");
 const speedValue = document.querySelector("#speed-value");
-const debugHud = document.querySelector("#debug-hud");
 const versionCounter = document.querySelector("#version-counter");
 const confettiLayer = document.querySelector("#confetti-layer");
 
@@ -775,11 +774,6 @@ const renderLabels = () => {
 
     overlay.renderLabel(label, x, y, visible);
   });
-
-  if (debugHud) {
-    const visibleCount = gameState.labels.filter(l => !l.locked && latestPositions[l.displayPlanetId]).length;
-    debugHud.textContent = `M:${gameState.markerVisible ? "✓" : "✗"} drag:${activeDragLabel || "--"} vis:${visibleCount}`;
-  }
 };
 
 const findNearestPlanet = (x, y, positions) => {
