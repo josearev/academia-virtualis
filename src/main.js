@@ -8,6 +8,7 @@ const SUCCESS_TEXT =
   "Felicidades! Has completado la actividad. Ahora has ganado 1 NFT que será guardado en tu NFT gallery";
 const RETURN_URL = "https://xerticagrupoacererobdr.my.canva.site/c1fncgdhef8bcwqy";
 const SNAP_DISTANCE = 100;
+const COMPLETION_COUNTDOWN_SECONDS = 5;
 const MINDAR_WAIT_TIMEOUT_MS = 12000;
 const MINDAR_POLL_INTERVAL_MS = 120;
 const IOS_RESIZE_DELAYS_MS = [0, 120, 320, 650];
@@ -62,6 +63,7 @@ const solarScene = createSolarSystemScene({
 let arCamera = null;
 let latestPositions = {};
 let completionTimerId = null;
+let completionCountdownIntervalId = null;
 let arStarted = false;
 let startInProgress = false;
 let dragLockedByCompletion = false;
@@ -302,8 +304,6 @@ const dragController = createDragController({
         return;
       }
 
-      const oldDisplayPlanetId = label.displayPlanetId;
-
       const displacedLabel = gameState.labels.find(
         (l) => l !== label && !l.locked && !l.dragging && l.displayPlanetId === label.id
       );
@@ -315,7 +315,7 @@ const dragController = createDragController({
       overlay.setProgress(gameState.correctCount, gameState.totalCount);
 
       if (displacedLabel) {
-        displacedLabel.displayPlanetId = oldDisplayPlanetId;
+        displacedLabel.displayPlanetId = label.id;
       }
 
       if (gameState.correctCount === gameState.totalCount) {
@@ -551,6 +551,32 @@ if (!isCameraContextAllowed()) {
 }
 
 const renderLabels = () => {
+  const stackIndexByLabelId = new Map();
+  const labelsByPlanet = new Map();
+
+  gameState.labels.forEach((label) => {
+    if (label.dragging || !gameState.markerVisible) {
+      return;
+    }
+
+    const anchor = latestPositions[label.displayPlanetId];
+    if (!anchor) {
+      return;
+    }
+
+    if (!labelsByPlanet.has(label.displayPlanetId)) {
+      labelsByPlanet.set(label.displayPlanetId, []);
+    }
+    labelsByPlanet.get(label.displayPlanetId).push(label);
+  });
+
+  labelsByPlanet.forEach((planetLabels) => {
+    planetLabels.sort((a, b) => Number(b.locked) - Number(a.locked));
+    planetLabels.forEach((label, index) => {
+      stackIndexByLabelId.set(label.id, index);
+    });
+  });
+
   gameState.labels.forEach((label) => {
     let x = label.pointerX;
     let y = label.pointerY;
@@ -563,8 +589,10 @@ const renderLabels = () => {
       if (anchor && gameState.markerVisible) {
         const zoomFactor = Math.sqrt(solarScene.getScale());
         const baseOffset = LABEL_OFFSET_BY_PLANET_ID[label.displayPlanetId] || 38;
+        const stackIndex = stackIndexByLabelId.get(label.id) || 0;
+        const stackSpacing = 34 * zoomFactor;
         x = anchor.x;
-        y = anchor.y - baseOffset * zoomFactor;
+        y = anchor.y - baseOffset * zoomFactor + stackIndex * stackSpacing;
         visible = true;
       }
     }
@@ -606,19 +634,49 @@ const completeActivity = () => {
     return;
   }
 
+  if (completionTimerId) {
+    clearTimeout(completionTimerId);
+    completionTimerId = null;
+  }
+  if (completionCountdownIntervalId) {
+    clearInterval(completionCountdownIntervalId);
+    completionCountdownIntervalId = null;
+  }
+
   gameState.completed = true;
   dragLockedByCompletion = true;
   dragController.setEnabled(false);
-  overlay.showCompletionMessage(SUCCESS_TEXT);
+  overlay.showCompletionCountdown(SUCCESS_TEXT, COMPLETION_COUNTDOWN_SECONDS);
+
+  let secondsLeft = COMPLETION_COUNTDOWN_SECONDS;
+  completionCountdownIntervalId = window.setInterval(() => {
+    secondsLeft -= 1;
+    if (secondsLeft <= 0) {
+      clearInterval(completionCountdownIntervalId);
+      completionCountdownIntervalId = null;
+      return;
+    }
+    overlay.updateCompletionCountdown(secondsLeft);
+  }, 1000);
 
   completionTimerId = window.setTimeout(() => {
+    completionTimerId = null;
+    if (completionCountdownIntervalId) {
+      clearInterval(completionCountdownIntervalId);
+      completionCountdownIntervalId = null;
+    }
     const nftImage = awardRandomNft();
-    overlay.showNftResult(nftImage);
-  }, 5000);
+    overlay.showNftPopup(nftImage);
+  }, COMPLETION_COUNTDOWN_SECONDS * 1000);
 };
 
 window.addEventListener("beforeunload", () => {
   if (completionTimerId) {
     clearTimeout(completionTimerId);
+    completionTimerId = null;
+  }
+  if (completionCountdownIntervalId) {
+    clearInterval(completionCountdownIntervalId);
+    completionCountdownIntervalId = null;
   }
 });

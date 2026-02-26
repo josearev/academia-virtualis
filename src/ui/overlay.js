@@ -7,6 +7,8 @@ export const createOverlay = ({ labels, onRetry, onClose }) => {
   const labelsLayer = document.querySelector("#labels-layer");
   const stampLayer = document.querySelector("#stamp-layer");
   const completionModal = document.querySelector("#completion-modal");
+  const completionCountdownValue = document.querySelector("#completion-countdown-value");
+  const nftModal = document.querySelector("#nft-modal");
   const completionMessage = document.querySelector("#completion-message");
   const nftFigure = document.querySelector("#nft-figure");
   const nftImage = document.querySelector("#nft-image");
@@ -81,13 +83,20 @@ export const createOverlay = ({ labels, onRetry, onClose }) => {
       stampLayer.appendChild(stamp);
       setTimeout(() => stamp.remove(), 750);
     },
-    showCompletionMessage(messageText) {
+    showCompletionCountdown(messageText, secondsLeft) {
       completionModal.hidden = false;
+      nftModal.hidden = true;
       completionMessage.textContent = messageText;
+      completionCountdownValue.textContent = String(secondsLeft);
+    },
+    updateCompletionCountdown(secondsLeft) {
+      completionCountdownValue.textContent = String(secondsLeft);
+    },
+    showNftPopup(imageSrc) {
+      completionModal.hidden = true;
+      nftModal.hidden = false;
       nftFigure.hidden = true;
       actionButtons.hidden = true;
-    },
-    showNftResult(imageSrc) {
       nftImage.src = imageSrc;
       nftFigure.hidden = false;
       actionButtons.hidden = false;

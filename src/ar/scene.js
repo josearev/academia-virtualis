@@ -15,7 +15,7 @@ const MAX_PLANET_SCALE = 3.0;
 const DEFAULT_PLANET_SCALE = 1.0;
 const MIN_SPEED_SCALE = 0;
 const MAX_SPEED_SCALE = 3.0;
-const DEFAULT_SPEED_SCALE = 1.0;
+const DEFAULT_SPEED_SCALE = 0.7;
 
 const createPlanetTexture = (three, planetId) => {
   const size = 256;

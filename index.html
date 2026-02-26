@@ -41,8 +41,8 @@
         <input id="planet-range" type="range" min="0.5" max="3" step="0.05" value="1" />
         <span id="planet-value">1.00x</span>
         <label for="speed-range">Velocidad de órbita</label>
-        <input id="speed-range" type="range" min="0" max="3" step="0.05" value="1" />
-        <span id="speed-value">1.00x</span>
+        <input id="speed-range" type="range" min="0" max="3" step="0.05" value="0.7" />
+        <span id="speed-value">0.70x</span>
       </section>
 
       <section id="camera-gate">
@@ -54,9 +54,14 @@
 
       <div id="debug-hud">M:✗ drag:-- vis:0</div>
 
-      <section id="completion-modal" hidden>
+      <section id="completion-modal" class="overlay-modal overlay-modal--countdown" hidden>
         <h1>Actividad completada</h1>
         <p id="completion-message"></p>
+        <p id="completion-countdown">Mostrando NFT en <span id="completion-countdown-value">5</span>s</p>
+      </section>
+
+      <section id="nft-modal" class="overlay-modal overlay-modal--nft" hidden>
+        <h1>NFT asignado</h1>
         <figure id="nft-figure" hidden>
           <img id="nft-image" alt="NFT ganado" />
           <figcaption>NFT asignado a tu galería local</figcaption>
