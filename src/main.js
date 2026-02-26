@@ -838,7 +838,7 @@ if (!isCameraContextAllowed()) {
   startArButton.disabled = true;
   logStartup("navigator.mediaDevices no disponible.");
 } else {
-  showCameraGate();
+  hideCameraGate();
   startArButton.disabled = false;
   setGateStatus(APP_CONFIG.autoStartStatusText);
   window.setTimeout(() => {
