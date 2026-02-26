@@ -7,6 +7,7 @@
     "compile:target": "node scripts/compile-target.mjs",
     "dev": "vite",
     "dev:host": "vite --host 0.0.0.0 --port 5173",
+    "dev:remote": "node scripts/dev-remote.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     "tunnel": "lt --port 5173"
   },
