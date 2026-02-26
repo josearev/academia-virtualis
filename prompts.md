@@ -139,3 +139,7 @@ nuevas mejoras:
 ---
 
 Agregar readme.md para github
+
+
+Por favor cambiemos el marcador para que sea esta imagen:
+/Users/josearevalo/proyectos/academia-virtualis/assets/markers/marker-sistema-solar.png
