@@ -2,6 +2,7 @@ import { createSolarSystemScene } from "./ar/scene.js";
 import {
   APP_CONFIG,
   APP_VERSION,
+  UI_FLAGS,
   UI_PREFERENCES,
   getSliderPreferenceFromCookies,
   saveSliderPreferenceToCookies
@@ -67,6 +68,13 @@ const planetRange = document.querySelector("#planet-range");
 const planetValue = document.querySelector("#planet-value");
 const speedRange = document.querySelector("#speed-range");
 const speedValue = document.querySelector("#speed-value");
+const rotationControls = document.querySelector("#rotation-controls");
+const rotationXRange = document.querySelector("#rotation-x-range");
+const rotationXValue = document.querySelector("#rotation-x-value");
+const rotationYRange = document.querySelector("#rotation-y-range");
+const rotationYValue = document.querySelector("#rotation-y-value");
+const rotationZRange = document.querySelector("#rotation-z-range");
+const rotationZValue = document.querySelector("#rotation-z-value");
 const versionCounter = document.querySelector("#version-counter");
 const confettiLayer = document.querySelector("#confetti-layer");
 
@@ -405,6 +413,8 @@ const pointerDistance = ([first, second]) => {
   return Math.hypot(first.x - second.x, first.y - second.y);
 };
 
+const formatRotationDegrees = (degrees) => `${Math.round(degrees)}°`;
+
 const initialZoomValue = getInitialSliderValue("zoom", minScale, maxScale, initialScale);
 const initialOrbitValue = getInitialSliderValue("orbit", minOrbitScale, maxOrbitScale, initialOrbitScale);
 const initialPlanetValue = getInitialSliderValue("planet", minPlanetScale, maxPlanetScale, initialPlanetScale);
@@ -414,6 +424,71 @@ applySolarScale(initialZoomValue, { persist: false });
 applyOrbitScale(initialOrbitValue, { persist: false });
 applyPlanetScale(initialPlanetValue, { persist: false });
 applyOrbitSpeed(initialSpeedValue, { persist: false });
+
+const rotationControlsEnabled = Boolean(
+  UI_FLAGS.showRotationControls
+  && rotationControls
+  && rotationXRange
+  && rotationXValue
+  && rotationYRange
+  && rotationYValue
+  && rotationZRange
+  && rotationZValue
+);
+
+const updateRotationUi = (rotationDegrees) => {
+  if (!rotationControlsEnabled) {
+    return;
+  }
+  rotationXRange.value = String(rotationDegrees.x);
+  rotationYRange.value = String(rotationDegrees.y);
+  rotationZRange.value = String(rotationDegrees.z);
+  rotationXValue.textContent = formatRotationDegrees(rotationDegrees.x);
+  rotationYValue.textContent = formatRotationDegrees(rotationDegrees.y);
+  rotationZValue.textContent = formatRotationDegrees(rotationDegrees.z);
+};
+
+const applySolarRotation = (partialRotation = {}, { persist = true } = {}) => {
+  if (!rotationControlsEnabled) {
+    return solarScene.getRotationDegrees();
+  }
+  const current = solarScene.getRotationDegrees();
+  const next = {
+    x: Number.isFinite(partialRotation.x) ? partialRotation.x : current.x,
+    y: Number.isFinite(partialRotation.y) ? partialRotation.y : current.y,
+    z: Number.isFinite(partialRotation.z) ? partialRotation.z : current.z
+  };
+  const applied = solarScene.setRotationDegrees(next);
+  updateRotationUi(applied);
+  if (persist) {
+    saveSliderPreferenceToCookies("rotationX", applied.x);
+    saveSliderPreferenceToCookies("rotationY", applied.y);
+    saveSliderPreferenceToCookies("rotationZ", applied.z);
+  }
+  return applied;
+};
+
+if (rotationControlsEnabled) {
+  const rotationRange = solarScene.getRotationRange();
+  rotationXRange.min = String(rotationRange.x.min);
+  rotationXRange.max = String(rotationRange.x.max);
+  rotationXRange.step = String(rotationRange.x.step);
+  rotationYRange.min = String(rotationRange.y.min);
+  rotationYRange.max = String(rotationRange.y.max);
+  rotationYRange.step = String(rotationRange.y.step);
+  rotationZRange.min = String(rotationRange.z.min);
+  rotationZRange.max = String(rotationRange.z.max);
+  rotationZRange.step = String(rotationRange.z.step);
+
+  const initialRotation = {
+    x: getInitialSliderValue("rotationX", rotationRange.x.min, rotationRange.x.max, rotationRange.x.initial),
+    y: getInitialSliderValue("rotationY", rotationRange.y.min, rotationRange.y.max, rotationRange.y.initial),
+    z: getInitialSliderValue("rotationZ", rotationRange.z.min, rotationRange.z.max, rotationRange.z.initial)
+  };
+  applySolarRotation(initialRotation, { persist: false });
+} else if (rotationControls) {
+  rotationControls.hidden = true;
+}
 
 const dragController = createDragController({
   canDrag: (labelId) => {
@@ -531,6 +606,9 @@ targetEl.addEventListener("targetFound", () => {
   gameState.markerVisible = true;
   overlay.setDefaultStatus(true);
   zoomControls.hidden = false;
+  if (rotationControlsEnabled) {
+    rotationControls.hidden = false;
+  }
 
   scheduleIosResizes();
 });
@@ -539,6 +617,9 @@ targetEl.addEventListener("targetLost", () => {
   gameState.markerVisible = false;
   overlay.setDefaultStatus(false);
   zoomControls.hidden = true;
+  if (rotationControls) {
+    rotationControls.hidden = true;
+  }
   pinchActive = false;
   pinchPointers.clear();
   if (!dragLockedByCompletion) {
@@ -635,6 +716,18 @@ const onSpeedSliderInput = (event) => {
   applyOrbitSpeed(Number(event.currentTarget.value));
 };
 
+const onRotationXSliderInput = (event) => {
+  applySolarRotation({ x: Number(event.currentTarget.value) });
+};
+
+const onRotationYSliderInput = (event) => {
+  applySolarRotation({ y: Number(event.currentTarget.value) });
+};
+
+const onRotationZSliderInput = (event) => {
+  applySolarRotation({ z: Number(event.currentTarget.value) });
+};
+
 const onPointerDown = (event) => {
   if (event.pointerType !== "touch" || !gameState.markerVisible || gameState.completed) {
     return;
@@ -697,6 +790,11 @@ zoomRange.addEventListener("input", onZoomSliderInput);
 orbitRange.addEventListener("input", onOrbitSliderInput);
 planetRange.addEventListener("input", onPlanetSliderInput);
 speedRange.addEventListener("input", onSpeedSliderInput);
+if (rotationControlsEnabled) {
+  rotationXRange.addEventListener("input", onRotationXSliderInput);
+  rotationYRange.addEventListener("input", onRotationYSliderInput);
+  rotationZRange.addEventListener("input", onRotationZSliderInput);
+}
 window.addEventListener("resize", () => {
   scheduleIosResizes();
   resizeConfettiLayer();

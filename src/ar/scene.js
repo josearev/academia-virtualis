@@ -1,4 +1,4 @@
-import { SCENE_CONFIG } from "../config/app-config.js";
+import { ROTATION_CONFIG, SCENE_CONFIG } from "../config/app-config.js";
 
 const BASE_SYSTEM_SCALE = SCENE_CONFIG.baseSystemScale;
 const PLANET_SCALE = SCENE_CONFIG.planetScale;
@@ -19,6 +19,11 @@ const DEFAULT_PLANET_SCALE = SCENE_CONFIG.planet.initial;
 const MIN_SPEED_SCALE = SCENE_CONFIG.speed.min;
 const MAX_SPEED_SCALE = SCENE_CONFIG.speed.max;
 const DEFAULT_SPEED_SCALE = SCENE_CONFIG.speed.initial;
+const DEFAULT_ROTATION_X = ROTATION_CONFIG.x.initial;
+const DEFAULT_ROTATION_Y = ROTATION_CONFIG.y.initial;
+const DEFAULT_ROTATION_Z = ROTATION_CONFIG.z.initial;
+
+const degreesToRadians = (degrees) => degrees * (Math.PI / 180);
 
 const createPlanetTexture = (three, planetId) => {
   const size = 256;
@@ -254,7 +259,26 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
   root.add(sun);
   root.add(sunLight);
   root.add(ambientLight);
-  root.rotation.x = -0.07;
+
+  let currentRotationDegrees = {
+    x: DEFAULT_ROTATION_X,
+    y: DEFAULT_ROTATION_Y,
+    z: DEFAULT_ROTATION_Z
+  };
+
+  const clampRotationByAxis = (axis, value) => {
+    const limits = ROTATION_CONFIG[axis];
+    if (!limits) {
+      return value;
+    }
+    return Math.min(limits.max, Math.max(limits.min, value));
+  };
+
+  const applyRotation = () => {
+    root.rotation.x = degreesToRadians(currentRotationDegrees.x);
+    root.rotation.y = degreesToRadians(currentRotationDegrees.y);
+    root.rotation.z = degreesToRadians(currentRotationDegrees.z);
+  };
 
   let currentScale = DEFAULT_ZOOM_SCALE;
   let currentOrbitScale = DEFAULT_ORBIT_SCALE;
@@ -356,6 +380,7 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
 
   applyLayout();
   applyScale();
+  applyRotation();
   setOrbitScale(DEFAULT_ORBIT_SCALE); // sincroniza orbitRingsGroup.scale desde el inicio
 
   return {
@@ -436,6 +461,29 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
     },
     getOrbitSpeedRange() {
       return { min: MIN_SPEED_SCALE, max: MAX_SPEED_SCALE, initial: DEFAULT_SPEED_SCALE };
+    },
+    setRotationDegrees({ x, y, z }) {
+      if (Number.isFinite(x)) {
+        currentRotationDegrees.x = clampRotationByAxis("x", x);
+      }
+      if (Number.isFinite(y)) {
+        currentRotationDegrees.y = clampRotationByAxis("y", y);
+      }
+      if (Number.isFinite(z)) {
+        currentRotationDegrees.z = clampRotationByAxis("z", z);
+      }
+      applyRotation();
+      return { ...currentRotationDegrees };
+    },
+    getRotationDegrees() {
+      return { ...currentRotationDegrees };
+    },
+    getRotationRange() {
+      return {
+        x: { ...ROTATION_CONFIG.x },
+        y: { ...ROTATION_CONFIG.y },
+        z: { ...ROTATION_CONFIG.z }
+      };
     },
     fitCorePlanetsToMarker
   };

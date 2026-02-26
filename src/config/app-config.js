@@ -1,8 +1,8 @@
 // Configuracion central de la app.
 // Este archivo concentra constantes y preferencias para facilitar ajustes sin tocar la logica.
 
-// Version visible en pantalla (subir +1 en sub-version por commit: 0.11 -> 0.12, etc).
-export const APP_VERSION = "0.12";
+// Version visible en pantalla (subir +1 en sub-version por commit: 0.12 -> 0.13, etc).
+export const APP_VERSION = "0.13";
 
 // Textos y valores globales del flujo principal.
 export const APP_CONFIG = {
@@ -34,6 +34,11 @@ export const UI_PREFERENCES = {
   confettiDensityFactor: 2.5
 };
 
+// Flags de visualizacion para habilitar/deshabilitar features de UI.
+export const UI_FLAGS = {
+  showRotationControls: true
+};
+
 // Textos de estado mostrados en la capa UI.
 export const OVERLAY_TEXTS = {
   tracking: "Arrastra cada nombre al planeta correcto.",
@@ -54,6 +59,13 @@ export const SCENE_CONFIG = {
   speed: { min: 0.0, max: 3.0, initial: 0.7 }
 };
 
+// Configuracion de rotacion global del sistema solar (en grados).
+export const ROTATION_CONFIG = {
+  x: { min: -180, max: 180, step: 1, initial: -4 },
+  y: { min: -180, max: 180, step: 1, initial: 0 },
+  z: { min: -180, max: 180, step: 1, initial: 0 }
+};
+
 // Persistencia de preferencias de sliders por cookie.
 export const SLIDER_COOKIE_CONFIG = {
   maxAgeDays: 180,
@@ -61,7 +73,10 @@ export const SLIDER_COOKIE_CONFIG = {
     zoom: "av_slider_zoom",
     orbit: "av_slider_orbit",
     planet: "av_slider_planet",
-    speed: "av_slider_speed"
+    speed: "av_slider_speed",
+    rotationX: "av_slider_rotation_x",
+    rotationY: "av_slider_rotation_y",
+    rotationZ: "av_slider_rotation_z"
   }
 };
 

@@ -242,21 +242,50 @@ body {
   pointer-events: auto;
 }
 
+#rotation-controls {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 59;
+  width: min(260px, 84vw);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(3, 10, 26, 0.88);
+  border: 1px solid rgba(122, 158, 219, 0.62);
+  display: grid;
+  gap: 8px;
+  pointer-events: auto;
+}
+
 #zoom-controls[hidden] {
   display: none;
 }
 
-#zoom-controls label {
+#rotation-controls[hidden] {
+  display: none;
+}
+
+#zoom-controls label,
+#rotation-controls label {
   font-size: 13px;
   font-weight: 700;
   color: var(--text-subtle);
 }
 
-#zoom-range {
+#zoom-range,
+#rotation-x-range,
+#rotation-y-range,
+#rotation-z-range {
   width: 100%;
 }
 
 #zoom-value {
+  justify-self: end;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.rotation-value {
   justify-self: end;
   font-size: 13px;
   color: var(--text);
@@ -411,6 +440,12 @@ button {
 
   #zoom-controls {
     width: min(240px, 80vw);
+  }
+
+  #rotation-controls {
+    width: min(220px, 72vw);
+    top: calc(max(70px, env(safe-area-inset-top)) + 10px);
+    bottom: auto;
   }
 
   #action-buttons {
