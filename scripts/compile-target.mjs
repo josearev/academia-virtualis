@@ -7,9 +7,11 @@ import { OfflineCompiler } from "mind-ar/src/image-target/offline-compiler.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "..");
-const sourceImagePath = path.join(rootDir, "logo-eight-academy.png");
 const outDir = path.join(rootDir, "assets", "targets");
-const outPath = path.join(outDir, "logo-eight-academy.mind");
+const sourceRelative = process.env.MARKER_SOURCE || "assets/markers/marker-tech.png";
+const sourceImagePath = path.resolve(rootDir, sourceRelative);
+const markerName = path.parse(sourceImagePath).name;
+const outPath = path.join(outDir, `${markerName}.mind`);
 
 const run = async () => {
   await fs.mkdir(outDir, { recursive: true });

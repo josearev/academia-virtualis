@@ -1,5 +1,5 @@
 const STATUS_TRACKING = "Marcador detectado. Arrastra cada nombre al planeta correcto.";
-const STATUS_SCANNING = "Buscando marcador. Apunta la cámara al logo de Eight Academy.";
+const STATUS_SCANNING = "Buscando marcador. Apunta la cámara al marcador AR técnico.";
 
 export const createOverlay = ({ labels, onRetry, onClose }) => {
   const statusPill = document.querySelector("#status-pill");

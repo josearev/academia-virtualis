@@ -13,7 +13,7 @@
     <div id="app-shell">
       <a-scene
         id="ar-scene"
-        mindar-image="imageTargetSrc: /assets/targets/logo-eight-academy.mind; autoStart: false; maxTrack: 1; uiLoading: no; uiScanning: no;"
+        mindar-image="imageTargetSrc: /assets/targets/marker-tech.mind; autoStart: false; maxTrack: 1; missTolerance: 10; warmupTolerance: 6; filterMinCF: 0.0001; filterBeta: 0.001; uiLoading: no; uiScanning: no;"
         color-space="sRGB"
         renderer="colorManagement: true, physicallyCorrectLights"
         vr-mode-ui="enabled: false"
@@ -34,7 +34,7 @@
 
       <section id="camera-gate">
         <h2>Actividad AR</h2>
-        <p id="camera-gate-text">Presiona el boton para iniciar la camara.</p>
+        <p id="camera-gate-text">Presiona el boton para iniciar la camara y apunta al marcador AR tecnico.</p>
         <button id="start-ar-btn" type="button">Iniciar camara AR</button>
         <p id="camera-debug" aria-live="polite"></p>
       </section>

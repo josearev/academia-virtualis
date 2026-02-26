@@ -10,8 +10,10 @@ const RETURN_URL = "https://xerticagrupoacererobdr.my.canva.site/c1fncgdhef8bcwq
 const SNAP_DISTANCE = 86;
 const MINDAR_WAIT_TIMEOUT_MS = 12000;
 const MINDAR_POLL_INTERVAL_MS = 120;
+const IOS_RESIZE_DELAYS_MS = [0, 120, 320, 650];
 const INSECURE_CONTEXT_TEXT =
   "Camara bloqueada por navegador: abre este sitio en HTTPS para usar AR en iPhone/iPad.";
+const PLANET_BY_ID = new Map(PLANETS.map((planet) => [planet.id, planet]));
 
 const gameState = createGameState();
 const overlay = createOverlay({
@@ -87,6 +89,55 @@ const waitForMindarSystem = async (timeoutMs = MINDAR_WAIT_TIMEOUT_MS) => {
   }
 
   throw new Error("El motor AR no se inicializo a tiempo.");
+};
+
+const syncArViewport = () => {
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  sceneEl.style.position = "fixed";
+  sceneEl.style.left = "0px";
+  sceneEl.style.top = "0px";
+  sceneEl.style.width = `${viewportWidth}px`;
+  sceneEl.style.height = `${viewportHeight}px`;
+
+  const canvasEl = sceneEl.canvas;
+  if (canvasEl) {
+    canvasEl.style.position = "fixed";
+    canvasEl.style.left = "0px";
+    canvasEl.style.top = "0px";
+    canvasEl.style.width = `${viewportWidth}px`;
+    canvasEl.style.height = `${viewportHeight}px`;
+  }
+
+  const mindarSystem = sceneEl.systems?.["mindar-image-system"];
+  const videoEl = mindarSystem?.video;
+  if (videoEl) {
+    videoEl.style.position = "fixed";
+    videoEl.style.left = "0px";
+    videoEl.style.top = "0px";
+    videoEl.style.width = `${viewportWidth}px`;
+    videoEl.style.height = `${viewportHeight}px`;
+    videoEl.style.objectFit = "cover";
+    videoEl.style.zIndex = "-2";
+  }
+};
+
+const requestArResize = () => {
+  const mindarSystem = sceneEl.systems?.["mindar-image-system"];
+  if (mindarSystem && typeof mindarSystem._resize === "function") {
+    try {
+      mindarSystem._resize();
+    } catch {
+      // Best effort; keep fallback CSS sync.
+    }
+  }
+  syncArViewport();
+};
+
+const scheduleIosResizes = () => {
+  IOS_RESIZE_DELAYS_MS.forEach((delayMs) => {
+    window.setTimeout(requestArResize, delayMs);
+  });
 };
 
 const dragController = createDragController({
@@ -172,7 +223,8 @@ sceneEl.addEventListener("arReady", () => {
   startInProgress = false;
   cameraGate.classList.add("hidden");
   logStartup("Motor AR activo.");
-  overlay.setStatus("Buscando marcador. Apunta la cámara al logo de Eight Academy.", false);
+  overlay.setStatus("Buscando marcador. Apunta la cámara al marcador AR técnico.", false);
+  scheduleIosResizes();
 });
 
 sceneEl.addEventListener("arError", (event) => {
@@ -187,6 +239,7 @@ sceneEl.addEventListener("arError", (event) => {
 targetEl.addEventListener("targetFound", () => {
   gameState.markerVisible = true;
   overlay.setDefaultStatus(true);
+  scheduleIosResizes();
 });
 
 targetEl.addEventListener("targetLost", () => {
@@ -196,6 +249,7 @@ targetEl.addEventListener("targetLost", () => {
 
 sceneEl.addEventListener("renderstart", () => {
   arCamera = sceneEl.camera;
+  syncArViewport();
   window.requestAnimationFrame(updateLoop);
 });
 
@@ -243,6 +297,7 @@ const startAr = async () => {
   startArButton.disabled = true;
   setGateStatus("Cargando motor AR...");
   logStartup("Esperando inicializacion de mindar-image-system.");
+  syncArViewport();
 
   try {
     const arSystem = await waitForMindarSystem();
@@ -250,6 +305,7 @@ const startAr = async () => {
     logStartup("Motor AR detectado, iniciando stream de camara.");
 
     await arSystem.start();
+    scheduleIosResizes();
   } catch (error) {
     startInProgress = false;
     startArButton.disabled = false;
@@ -259,7 +315,10 @@ const startAr = async () => {
   }
 };
 
+syncArViewport();
 startArButton.addEventListener("click", startAr);
+window.addEventListener("resize", scheduleIosResizes);
+window.addEventListener("orientationchange", scheduleIosResizes);
 
 if (!isCameraContextAllowed()) {
   setGateStatus(INSECURE_CONTEXT_TEXT);
@@ -278,8 +337,10 @@ const renderLabels = () => {
     } else {
       const anchor = latestPositions[label.displayPlanetId];
       if (anchor && gameState.markerVisible && anchor.visible) {
+        const planetData = PLANET_BY_ID.get(label.displayPlanetId);
+        const verticalOffset = planetData ? 34 + planetData.radius * 320 : 44;
         x = anchor.x;
-        y = anchor.y - 44;
+        y = anchor.y - verticalOffset;
         visible = true;
       }
     }

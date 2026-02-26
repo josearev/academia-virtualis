@@ -30,6 +30,19 @@ body {
   inset: 0;
 }
 
+#ar-scene,
+#ar-scene canvas,
+#ar-scene video {
+  width: 100vw;
+  height: 100vh;
+}
+
+#ar-scene canvas,
+#ar-scene video {
+  position: fixed !important;
+  inset: 0 !important;
+}
+
 #hud {
   position: fixed;
   top: max(14px, env(safe-area-inset-top));

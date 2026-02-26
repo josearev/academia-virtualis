@@ -1,27 +1,34 @@
+const SYSTEM_SCALE = 0.44;
+const ORBIT_SCALE = 0.42;
+const PLANET_SCALE = 0.92;
+const SUN_SCALE = 0.74;
+
 const createPlanetMesh = (three, planet) => {
-  const geometry = new three.SphereGeometry(planet.radius, 32, 24);
+  const geometry = new three.SphereGeometry(planet.radius * PLANET_SCALE, 32, 24);
   const material = new three.MeshStandardMaterial({
     color: planet.color,
+    emissive: planet.color,
+    emissiveIntensity: 0.08,
     roughness: 0.72,
     metalness: 0.06
   });
   const mesh = new three.Mesh(geometry, material);
-  mesh.position.x = planet.orbitRadius;
+  mesh.position.x = planet.orbitRadius * ORBIT_SCALE;
   return mesh;
 };
 
 export const createSolarSystemScene = ({ targetEl, planets }) => {
   const three = window.AFRAME.THREE;
   const root = new three.Group();
-  const sunLight = new three.PointLight(0xffd17c, 1.6, 4.6);
-  const ambientLight = new three.AmbientLight(0xbccfff, 0.55);
+  const sunLight = new three.PointLight(0xffd17c, 2.3, 2.2);
+  const ambientLight = new three.AmbientLight(0xbccfff, 0.72);
 
   const sun = new three.Mesh(
-    new three.SphereGeometry(0.09, 36, 28),
+    new three.SphereGeometry(0.09 * SUN_SCALE, 36, 28),
     new three.MeshStandardMaterial({
       color: 0xffb43b,
       emissive: 0xff8c1f,
-      emissiveIntensity: 0.8,
+      emissiveIntensity: 1.05,
       roughness: 0.65,
       metalness: 0.1
     })
@@ -30,7 +37,9 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
   root.add(sun);
   root.add(sunLight);
   root.add(ambientLight);
-  root.rotation.x = -0.2;
+  root.scale.setScalar(SYSTEM_SCALE);
+  root.position.set(0, -0.005, 0.04);
+  root.rotation.x = -0.09;
 
   const byId = new Map();
   const tmpVector = new three.Vector3();
@@ -42,7 +51,7 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
 
     if (planet.id === "saturno") {
       const ring = new three.Mesh(
-        new three.TorusGeometry(planet.radius * 1.9, planet.radius * 0.15, 12, 48),
+        new three.TorusGeometry(planet.radius * PLANET_SCALE * 1.9, planet.radius * PLANET_SCALE * 0.15, 12, 48),
         new three.MeshStandardMaterial({ color: 0xcbb88f, roughness: 0.8, metalness: 0.08 })
       );
       ring.rotation.x = Math.PI / 2.6;
