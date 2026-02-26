@@ -13,7 +13,17 @@ const MINDAR_POLL_INTERVAL_MS = 120;
 const IOS_RESIZE_DELAYS_MS = [0, 120, 320, 650];
 const INSECURE_CONTEXT_TEXT =
   "Camara bloqueada por navegador: abre este sitio en HTTPS para usar AR en iPhone/iPad.";
-const PLANET_BY_ID = new Map(PLANETS.map((planet) => [planet.id, planet]));
+const LABEL_OFFSET_BY_PLANET_ID = {
+  mercurio: 30,
+  venus: 34,
+  tierra: 38,
+  marte: 34,
+  jupiter: 44,
+  saturno: 42,
+  urano: 38,
+  neptuno: 38,
+  pluton: 30
+};
 
 const gameState = createGameState();
 const overlay = createOverlay({
@@ -256,6 +266,7 @@ sceneEl.addEventListener("arReady", () => {
   arStarted = true;
   startInProgress = false;
   cameraGate.classList.add("hidden");
+  solarScene.setLayoutPreset("didactic");
   logStartup("Motor AR activo.");
   overlay.setStatus("Buscando marcador. Apunta la cámara al marcador AR técnico.", false);
   scheduleIosResizes();
@@ -274,6 +285,11 @@ targetEl.addEventListener("targetFound", () => {
   gameState.markerVisible = true;
   overlay.setDefaultStatus(true);
   zoomControls.hidden = false;
+
+  solarScene.setLayoutPreset("didactic");
+  const fittedScale = solarScene.fitCorePlanetsToMarker();
+  updateZoomUi(fittedScale);
+
   scheduleIosResizes();
 });
 
@@ -441,11 +457,10 @@ const renderLabels = () => {
     } else {
       const anchor = latestPositions[label.displayPlanetId];
       if (anchor && gameState.markerVisible && anchor.visible) {
-        const planetData = PLANET_BY_ID.get(label.displayPlanetId);
         const zoomFactor = Math.sqrt(solarScene.getScale());
-        const verticalOffset = planetData ? (30 + planetData.radius * 280) * zoomFactor : 42;
+        const baseOffset = LABEL_OFFSET_BY_PLANET_ID[label.displayPlanetId] || 38;
         x = anchor.x;
-        y = anchor.y - verticalOffset;
+        y = anchor.y - baseOffset * zoomFactor;
         visible = true;
       }
     }
