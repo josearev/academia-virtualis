@@ -36,8 +36,8 @@ export const UI_PREFERENCES = {
 
 // Textos de estado mostrados en la capa UI.
 export const OVERLAY_TEXTS = {
-  tracking: "Marcador detectado. Arrastra cada nombre al planeta correcto.",
-  scanning: "Buscando marcador. Apunta la cámara al marcador AR técnico."
+  tracking: "Arrastra cada nombre al planeta correcto.",
+  scanning: "Buscando marcador. Apunta la cámara al marcador AR."
 };
 
 // Configuracion del motor de escena (rangos de sliders y constantes de escala).
