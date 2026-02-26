@@ -81,7 +81,7 @@ body {
 }
 
 #labels-layer {
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .planet-label {
