@@ -8,8 +8,10 @@ const SUCCESS_TEXT =
   "Felicidades! Has completado la actividad. Ahora has ganado 1 NFT que será guardado en tu NFT gallery";
 const RETURN_URL = "https://xerticagrupoacererobdr.my.canva.site/c1fncgdhef8bcwqy";
 const SNAP_DISTANCE = 86;
+const MINDAR_WAIT_TIMEOUT_MS = 12000;
+const MINDAR_POLL_INTERVAL_MS = 120;
 const INSECURE_CONTEXT_TEXT =
-  "Camara bloqueada por navegador: abre este sitio en HTTPS (por ejemplo con localtunnel) para usar AR en iPhone/iPad.";
+  "Camara bloqueada por navegador: abre este sitio en HTTPS para usar AR en iPhone/iPad.";
 
 const gameState = createGameState();
 const overlay = createOverlay({
@@ -27,6 +29,7 @@ const sceneEl = document.querySelector("#ar-scene");
 const targetEl = document.querySelector("#target-root");
 const cameraGate = document.querySelector("#camera-gate");
 const cameraGateText = document.querySelector("#camera-gate-text");
+const cameraDebug = document.querySelector("#camera-debug");
 const startArButton = document.querySelector("#start-ar-btn");
 
 const solarScene = createSolarSystemScene({
@@ -38,6 +41,53 @@ let arCamera = null;
 let latestPositions = {};
 let completionTimerId = null;
 let arStarted = false;
+let startInProgress = false;
+
+const logStartup = (text) => {
+  cameraDebug.textContent = text;
+};
+
+const setGateStatus = (text) => {
+  cameraGateText.textContent = text;
+  overlay.setStatus(text, false);
+};
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const waitForSceneLoad = async (timeoutMs = MINDAR_WAIT_TIMEOUT_MS) => {
+  if (sceneEl.hasLoaded) {
+    return;
+  }
+
+  await new Promise((resolve, reject) => {
+    const timerId = setTimeout(() => {
+      sceneEl.removeEventListener("loaded", onLoad);
+      reject(new Error("La escena A-Frame no termino de cargar."));
+    }, timeoutMs);
+
+    const onLoad = () => {
+      clearTimeout(timerId);
+      resolve();
+    };
+
+    sceneEl.addEventListener("loaded", onLoad, { once: true });
+  });
+};
+
+const waitForMindarSystem = async (timeoutMs = MINDAR_WAIT_TIMEOUT_MS) => {
+  await waitForSceneLoad(timeoutMs);
+
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    const system = sceneEl.systems?.["mindar-image-system"];
+    if (system && typeof system.start === "function") {
+      return system;
+    }
+    await sleep(MINDAR_POLL_INTERVAL_MS);
+  }
+
+  throw new Error("El motor AR no se inicializo a tiempo.");
+};
 
 const dragController = createDragController({
   canDrag: (labelId) => {
@@ -118,13 +168,20 @@ const updateLoop = (timeMs) => {
 };
 
 sceneEl.addEventListener("arReady", () => {
+  arStarted = true;
+  startInProgress = false;
   cameraGate.classList.add("hidden");
+  logStartup("Motor AR activo.");
   overlay.setStatus("Buscando marcador. Apunta la cámara al logo de Eight Academy.", false);
 });
 
-sceneEl.addEventListener("arError", () => {
+sceneEl.addEventListener("arError", (event) => {
+  arStarted = false;
+  startInProgress = false;
   startArButton.disabled = false;
-  overlay.setStatus("No fue posible acceder a la cámara. Revisa permisos e intenta nuevamente.", false);
+  const errorCode = event?.detail?.error || "ERROR_DESCONOCIDO";
+  setGateStatus("No fue posible acceder a la cámara. Revisa permisos e intenta nuevamente.");
+  logStartup(`Error AR: ${errorCode}`);
 });
 
 targetEl.addEventListener("targetFound", () => {
@@ -142,6 +199,16 @@ sceneEl.addEventListener("renderstart", () => {
   window.requestAnimationFrame(updateLoop);
 });
 
+window.addEventListener("error", (event) => {
+  const message = event?.message || "Error de ejecucion";
+  logStartup(`JS: ${message}`);
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  const reason = event?.reason?.message || String(event?.reason || "Promesa rechazada");
+  logStartup(`Promise: ${reason}`);
+});
+
 const isCameraContextAllowed = () => {
   if (window.isSecureContext) {
     return true;
@@ -149,45 +216,55 @@ const isCameraContextAllowed = () => {
   return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 };
 
+const hasCameraApi = () => {
+  return Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+};
+
 const startAr = async () => {
-  if (arStarted) {
+  if (arStarted || startInProgress) {
     return;
   }
 
   if (!isCameraContextAllowed()) {
-    cameraGateText.textContent = INSECURE_CONTEXT_TEXT;
-    overlay.setStatus(INSECURE_CONTEXT_TEXT, false);
+    setGateStatus(INSECURE_CONTEXT_TEXT);
     startArButton.disabled = true;
+    logStartup("Bloqueado por contexto inseguro.");
     return;
   }
 
-  const arSystem = sceneEl.systems["mindar-image-system"];
-  if (!arSystem) {
-    overlay.setStatus("Cargando motor AR... intenta nuevamente en 1 segundo.", false);
+  if (!hasCameraApi()) {
+    setGateStatus("Este navegador no expone la API de camara requerida para AR.");
+    startArButton.disabled = true;
+    logStartup("navigator.mediaDevices no disponible.");
     return;
   }
 
+  startInProgress = true;
   startArButton.disabled = true;
-  cameraGateText.textContent = "Permite el acceso a la camara cuando el navegador lo solicite.";
-  overlay.setStatus("Solicitando permisos de cámara...", false);
+  setGateStatus("Cargando motor AR...");
+  logStartup("Esperando inicializacion de mindar-image-system.");
 
   try {
+    const arSystem = await waitForMindarSystem();
+    setGateStatus("Motor AR listo. Solicitando permisos de cámara...");
+    logStartup("Motor AR detectado, iniciando stream de camara.");
+
     await arSystem.start();
-    arStarted = true;
-    cameraGate.classList.add("hidden");
   } catch (error) {
+    startInProgress = false;
     startArButton.disabled = false;
-    cameraGateText.textContent = "No se pudo abrir la camara. Verifica permisos y vuelve a intentar.";
-    overlay.setStatus("No se pudo abrir la cámara. Toca de nuevo 'Iniciar camara AR'.", false);
+    const message = error?.message || "No se pudo inicializar AR.";
+    setGateStatus("No se pudo iniciar AR. Toca de nuevo 'Iniciar camara AR'.");
+    logStartup(message);
   }
 };
 
 startArButton.addEventListener("click", startAr);
 
 if (!isCameraContextAllowed()) {
-  cameraGateText.textContent = INSECURE_CONTEXT_TEXT;
-  overlay.setStatus(INSECURE_CONTEXT_TEXT, false);
+  setGateStatus(INSECURE_CONTEXT_TEXT);
   startArButton.disabled = true;
+  logStartup("Usa URL HTTPS para habilitar camara en iOS.");
 }
 
 const renderLabels = () => {

@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Academia Virtualis - Sistema Solar AR</title>
     <link rel="stylesheet" href="/src/styles.css" />
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="/vendor/aframe/aframe.min.js"></script>
+    <script src="/vendor/mindar/mindar-image.prod.js"></script>
+    <script src="/vendor/mindar/mindar-image-aframe.prod.js"></script>
   </head>
   <body>
     <div id="app-shell">
@@ -36,6 +36,7 @@
         <h2>Actividad AR</h2>
         <p id="camera-gate-text">Presiona el boton para iniciar la camara.</p>
         <button id="start-ar-btn" type="button">Iniciar camara AR</button>
+        <p id="camera-debug" aria-live="polite"></p>
       </section>
 
       <section id="completion-modal" hidden>

@@ -3,15 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
+    "build": "npm run vendor:sync && vite build",
     "compile:target": "node scripts/compile-target.mjs",
-    "dev": "vite",
-    "dev:host": "vite --host 0.0.0.0 --port 5173",
-    "dev:remote": "node scripts/dev-remote.mjs",
+    "dev": "npm run vendor:sync && vite",
+    "dev:host": "npm run vendor:sync && vite --host 0.0.0.0 --port 5173",
+    "dev:remote": "npm run vendor:sync && node scripts/dev-remote.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
-    "tunnel": "node scripts/dev-remote.mjs"
+    "tunnel": "npm run vendor:sync && node scripts/dev-remote.mjs",
+    "vendor:sync": "node scripts/sync-vendor.mjs"
   },
   "dependencies": {
+    "aframe": "^1.7.1",
     "canvas": "^2.11.2",
     "localtunnel": "^2.0.2",
     "mind-ar": "^1.2.5"
