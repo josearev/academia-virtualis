@@ -59,7 +59,9 @@ const cameraGate = document.querySelector("#camera-gate");
 const cameraGateText = document.querySelector("#camera-gate-text");
 const cameraDebug = document.querySelector("#camera-debug");
 const startArButton = document.querySelector("#start-ar-btn");
-const zoomControls = document.querySelector("#zoom-controls");
+const controlsPanel = document.querySelector("#controls-panel");
+const controlsToggle = document.querySelector("#controls-toggle");
+const rotationSection = document.querySelector("#rotation-section");
 const zoomRange = document.querySelector("#zoom-range");
 const zoomValue = document.querySelector("#zoom-value");
 const orbitRange = document.querySelector("#orbit-range");
@@ -68,9 +70,6 @@ const planetRange = document.querySelector("#planet-range");
 const planetValue = document.querySelector("#planet-value");
 const speedRange = document.querySelector("#speed-range");
 const speedValue = document.querySelector("#speed-value");
-const rotationControls = document.querySelector("#rotation-controls");
-const zoomControlsToggle = document.querySelector("#zoom-controls-toggle");
-const rotationControlsToggle = document.querySelector("#rotation-controls-toggle");
 const rotationXRange = document.querySelector("#rotation-x-range");
 const rotationXValue = document.querySelector("#rotation-x-value");
 const rotationYRange = document.querySelector("#rotation-y-range");
@@ -79,7 +78,6 @@ const rotationZRange = document.querySelector("#rotation-z-range");
 const rotationZValue = document.querySelector("#rotation-z-value");
 const versionCounter = document.querySelector("#version-counter");
 const confettiLayer = document.querySelector("#confetti-layer");
-const mobileControlsQuery = window.matchMedia("(max-width: 768px)");
 
 const solarScene = createSolarSystemScene({
   targetEl,
@@ -100,9 +98,7 @@ let pinchActive = false;
 let pinchStartDistance = 0;
 let pinchStartScale = 1;
 let activeDragLabel = null;
-let zoomControlsCollapsed = mobileControlsQuery.matches;
-let rotationControlsCollapsed = mobileControlsQuery.matches;
-let lastIsMobileViewport = mobileControlsQuery.matches;
+let controlsPanelCollapsed = true;
 const pinchPointers = new Map();
 const confettiCtx = confettiLayer?.getContext("2d");
 
@@ -129,42 +125,27 @@ const showCameraGate = () => {
   cameraGate.classList.remove("hidden");
 };
 
-const updatePanelCollapseState = (panelElement, toggleElement, collapsed, expandLabel, collapseLabel) => {
-  if (!panelElement || !toggleElement) {
+const applyControlsPanelState = () => {
+  if (!controlsPanel || !controlsToggle) {
     return;
   }
-  const shouldCollapse = mobileControlsQuery.matches && collapsed;
-  panelElement.classList.toggle("controls-panel--collapsed", shouldCollapse);
-  toggleElement.textContent = shouldCollapse ? ">" : "<";
-  toggleElement.setAttribute("aria-expanded", String(!shouldCollapse));
-  toggleElement.setAttribute("aria-label", shouldCollapse ? expandLabel : collapseLabel);
-};
-
-const syncCollapsedControlsUi = () => {
-  updatePanelCollapseState(
-    zoomControls,
-    zoomControlsToggle,
-    zoomControlsCollapsed,
-    "Expandir controles de zoom",
-    "Colapsar controles de zoom"
-  );
-  updatePanelCollapseState(
-    rotationControls,
-    rotationControlsToggle,
-    rotationControlsCollapsed,
-    "Expandir controles de rotación",
-    "Colapsar controles de rotación"
+  const markerVisible = Boolean(gameState.markerVisible);
+  controlsToggle.hidden = !markerVisible;
+  controlsPanel.hidden = !markerVisible || controlsPanelCollapsed;
+  controlsToggle.textContent = controlsPanelCollapsed ? "☰" : "<";
+  controlsToggle.setAttribute("aria-expanded", String(!controlsPanelCollapsed));
+  controlsToggle.setAttribute(
+    "aria-label",
+    controlsPanelCollapsed ? "Expandir panel de controles" : "Colapsar panel de controles"
   );
 };
 
-const syncViewportControlsMode = () => {
-  const isMobile = mobileControlsQuery.matches;
-  if (isMobile !== lastIsMobileViewport) {
-    zoomControlsCollapsed = isMobile;
-    rotationControlsCollapsed = isMobile;
-    lastIsMobileViewport = isMobile;
+const setControlsPanelCollapsed = (nextCollapsed, { persist = true } = {}) => {
+  controlsPanelCollapsed = Boolean(nextCollapsed);
+  applyControlsPanelState();
+  if (persist) {
+    saveSliderPreferenceToCookies("controlsPanelCollapsed", controlsPanelCollapsed ? 1 : 0);
   }
-  syncCollapsedControlsUi();
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -479,9 +460,15 @@ applyOrbitScale(initialOrbitValue, { persist: false });
 applyPlanetScale(initialPlanetValue, { persist: false });
 applyOrbitSpeed(initialSpeedValue, { persist: false });
 
+const initialControlsPanelPreference = getSliderPreferenceFromCookies("controlsPanelCollapsed");
+if (Number.isFinite(initialControlsPanelPreference)) {
+  controlsPanelCollapsed = initialControlsPanelPreference >= 0.5;
+}
+applyControlsPanelState();
+
 const rotationControlsEnabled = Boolean(
   UI_FLAGS.showRotationControls
-  && rotationControls
+  && rotationSection
   && rotationXRange
   && rotationXValue
   && rotationYRange
@@ -523,6 +510,7 @@ const applySolarRotation = (partialRotation = {}, { persist = true } = {}) => {
 };
 
 if (rotationControlsEnabled) {
+  rotationSection.hidden = false;
   const rotationRange = solarScene.getRotationRange();
   rotationXRange.min = String(rotationRange.x.min);
   rotationXRange.max = String(rotationRange.x.max);
@@ -540,11 +528,9 @@ if (rotationControlsEnabled) {
     z: getInitialSliderValue("rotationZ", rotationRange.z.min, rotationRange.z.max, rotationRange.z.initial)
   };
   applySolarRotation(initialRotation, { persist: false });
-} else if (rotationControls) {
-  rotationControls.hidden = true;
+} else if (rotationSection) {
+  rotationSection.hidden = true;
 }
-
-syncViewportControlsMode();
 
 const dragController = createDragController({
   canDrag: (labelId) => {
@@ -662,22 +648,17 @@ sceneEl.addEventListener("arError", (event) => {
 targetEl.addEventListener("targetFound", () => {
   gameState.markerVisible = true;
   overlay.setDefaultStatus(true);
-  zoomControls.hidden = false;
-  if (rotationControlsEnabled) {
-    rotationControls.hidden = false;
+  if (rotationSection) {
+    rotationSection.hidden = !rotationControlsEnabled;
   }
-
-  syncCollapsedControlsUi();
+  applyControlsPanelState();
   scheduleIosResizes();
 });
 
 targetEl.addEventListener("targetLost", () => {
   gameState.markerVisible = false;
   overlay.setDefaultStatus(false);
-  zoomControls.hidden = true;
-  if (rotationControls) {
-    rotationControls.hidden = true;
-  }
+  applyControlsPanelState();
   pinchActive = false;
   pinchPointers.clear();
   if (!dragLockedByCompletion) {
@@ -852,16 +833,9 @@ syncArViewport();
 startArButton.addEventListener("click", () => {
   void startAr({ manual: true });
 });
-if (zoomControlsToggle) {
-  zoomControlsToggle.addEventListener("click", () => {
-    zoomControlsCollapsed = !zoomControlsCollapsed;
-    syncCollapsedControlsUi();
-  });
-}
-if (rotationControlsToggle) {
-  rotationControlsToggle.addEventListener("click", () => {
-    rotationControlsCollapsed = !rotationControlsCollapsed;
-    syncCollapsedControlsUi();
+if (controlsToggle) {
+  controlsToggle.addEventListener("click", () => {
+    setControlsPanelCollapsed(!controlsPanelCollapsed);
   });
 }
 zoomRange.addEventListener("input", onZoomSliderInput);
@@ -874,12 +848,10 @@ if (rotationControlsEnabled) {
   rotationZRange.addEventListener("input", onRotationZSliderInput);
 }
 window.addEventListener("resize", () => {
-  syncViewportControlsMode();
   scheduleIosResizes();
   resizeConfettiLayer();
 });
 window.addEventListener("orientationchange", () => {
-  syncViewportControlsMode();
   scheduleIosResizes();
   resizeConfettiLayer();
 });

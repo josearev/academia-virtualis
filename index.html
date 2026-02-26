@@ -31,50 +31,46 @@
       <div id="labels-layer" aria-label="Etiquetas de planetas"></div>
       <div id="stamp-layer" aria-hidden="true"></div>
       <canvas id="confetti-layer" aria-hidden="true" hidden></canvas>
-      <section id="zoom-controls" class="controls-panel" hidden>
-        <button
-          id="zoom-controls-toggle"
-          class="controls-toggle"
-          type="button"
-          aria-label="Expandir controles de zoom"
-          aria-expanded="false"
-        >
-          &gt;
-        </button>
-        <label for="zoom-range">Zoom sistema solar</label>
-        <input id="zoom-range" type="range" min="0.1" max="8" step="0.01" value="1.5" />
-        <span id="zoom-value">1.50x</span>
-        <label for="orbit-range">Tamaño de órbitas</label>
-        <input id="orbit-range" type="range" min="2" max="5" step="0.05" value="2.5" />
-        <span id="orbit-value">2.50x</span>
-        <label for="planet-range">Tamaño de planetas</label>
-        <input id="planet-range" type="range" min="0.5" max="3" step="0.05" value="1" />
-        <span id="planet-value">1.00x</span>
-        <label for="speed-range">Velocidad de órbita</label>
-        <input id="speed-range" type="range" min="0" max="3" step="0.05" value="0.7" />
-        <span id="speed-value">0.70x</span>
+      <section id="controls-panel" class="controls-panel" hidden>
+        <div class="controls-section">
+          <h3 class="controls-section-title">Configuración</h3>
+          <label for="zoom-range">Zoom sistema solar</label>
+          <input id="zoom-range" type="range" min="0.1" max="8" step="0.01" value="1.5" />
+          <span id="zoom-value">1.50x</span>
+          <label for="orbit-range">Tamaño de órbitas</label>
+          <input id="orbit-range" type="range" min="2" max="5" step="0.05" value="2.5" />
+          <span id="orbit-value">2.50x</span>
+          <label for="planet-range">Tamaño de planetas</label>
+          <input id="planet-range" type="range" min="0.5" max="3" step="0.05" value="1" />
+          <span id="planet-value">1.00x</span>
+          <label for="speed-range">Velocidad de órbita</label>
+          <input id="speed-range" type="range" min="0" max="3" step="0.05" value="0.7" />
+          <span id="speed-value">0.70x</span>
+        </div>
+        <div id="rotation-section" class="controls-section">
+          <h3 class="controls-section-title">Rotación</h3>
+          <label for="rotation-x-range">Rotación X</label>
+          <input id="rotation-x-range" type="range" min="-180" max="180" step="1" value="-4" />
+          <span id="rotation-x-value" class="rotation-value">-4°</span>
+          <label for="rotation-y-range">Rotación Y</label>
+          <input id="rotation-y-range" type="range" min="-180" max="180" step="1" value="0" />
+          <span id="rotation-y-value" class="rotation-value">0°</span>
+          <label for="rotation-z-range">Rotación Z</label>
+          <input id="rotation-z-range" type="range" min="-180" max="180" step="1" value="0" />
+          <span id="rotation-z-value" class="rotation-value">0°</span>
+        </div>
       </section>
 
-      <section id="rotation-controls" class="controls-panel" hidden>
-        <button
-          id="rotation-controls-toggle"
-          class="controls-toggle"
-          type="button"
-          aria-label="Expandir controles de rotación"
-          aria-expanded="false"
-        >
-          &gt;
-        </button>
-        <label for="rotation-x-range">Rotación X</label>
-        <input id="rotation-x-range" type="range" min="-180" max="180" step="1" value="-4" />
-        <span id="rotation-x-value" class="rotation-value">-4°</span>
-        <label for="rotation-y-range">Rotación Y</label>
-        <input id="rotation-y-range" type="range" min="-180" max="180" step="1" value="0" />
-        <span id="rotation-y-value" class="rotation-value">0°</span>
-        <label for="rotation-z-range">Rotación Z</label>
-        <input id="rotation-z-range" type="range" min="-180" max="180" step="1" value="0" />
-        <span id="rotation-z-value" class="rotation-value">0°</span>
-      </section>
+      <button
+        id="controls-toggle"
+        class="controls-toggle"
+        type="button"
+        aria-label="Expandir panel de controles"
+        aria-expanded="false"
+        hidden
+      >
+        &#9776;
+      </button>
 
       <section id="camera-gate" hidden>
         <h2>Actividad AR</h2>

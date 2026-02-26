@@ -76,7 +76,8 @@ export const SLIDER_COOKIE_CONFIG = {
     speed: "av_slider_speed",
     rotationX: "av_slider_rotation_x",
     rotationY: "av_slider_rotation_y",
-    rotationZ: "av_slider_rotation_z"
+    rotationZ: "av_slider_rotation_z",
+    controlsPanelCollapsed: "av_controls_collapsed"
   }
 };
 
