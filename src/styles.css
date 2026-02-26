@@ -43,6 +43,10 @@ body {
   inset: 0 !important;
 }
 
+#ar-scene canvas {
+  pointer-events: none;
+}
+
 #hud {
   position: fixed;
   top: max(14px, env(safe-area-inset-top));

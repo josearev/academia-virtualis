@@ -7,6 +7,9 @@ const DEFAULT_ZOOM_SCALE = 1.2;
 const ORBIT_SPEED_SCALE = 0.25;
 const CORE_PLANETS = ["mercurio", "venus", "tierra", "marte"];
 const CORE_TARGET_WIDTH = 0.34;
+const MIN_ORBIT_SCALE = 0.4;
+const MAX_ORBIT_SCALE = 3.0;
+const DEFAULT_ORBIT_SCALE = 1.0;
 
 const createPlanetTexture = (three, planetId) => {
   const size = 256;
@@ -245,6 +248,10 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
   root.rotation.x = -0.07;
 
   let currentScale = DEFAULT_ZOOM_SCALE;
+  let currentOrbitScale = DEFAULT_ORBIT_SCALE;
+
+  const orbitRingsGroup = new three.Group();
+  root.add(orbitRingsGroup);
 
   const planetNodes = new Map();
   const tmpVector = new three.Vector3();
@@ -284,7 +291,7 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
     }
 
     root.add(orbitPivot);
-    root.add(createOrbitRing(three, planet.orbitRadius));
+    orbitRingsGroup.add(createOrbitRing(three, planet.orbitRadius));
     planetNodes.set(planet.id, node);
   });
 
@@ -296,12 +303,23 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
 
     planetNodes.forEach((node) => {
       node.orbitPivot.position.set(0, 0, 0);
-      node.mesh.position.set(node.data.orbitRadius, 0, 0);
+      node.mesh.position.set(node.data.orbitRadius * currentOrbitScale, 0, 0);
     });
   };
 
   const applyScale = () => {
     root.scale.setScalar(BASE_SYSTEM_SCALE * currentScale);
+  };
+
+  const clampOrbitScale = (s) => Math.min(MAX_ORBIT_SCALE, Math.max(MIN_ORBIT_SCALE, s));
+
+  const setOrbitScale = (scale) => {
+    currentOrbitScale = clampOrbitScale(scale);
+    orbitRingsGroup.scale.setScalar(currentOrbitScale);
+    planetNodes.forEach((node) => {
+      node.mesh.position.setX(node.data.orbitRadius * currentOrbitScale);
+    });
+    return currentOrbitScale;
   };
 
   const setScale = (scale) => {
@@ -314,7 +332,8 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
     const maxCoreOrbitRadius = Math.max(
       ...CORE_PLANETS.map((id) => planetNodes.get(id)?.data.orbitRadius ?? 0)
     );
-    const targetScale = clampScale(CORE_TARGET_WIDTH / (2 * maxCoreOrbitRadius * BASE_SYSTEM_SCALE));
+    const effectiveRadius = maxCoreOrbitRadius * currentOrbitScale;
+    const targetScale = clampScale(CORE_TARGET_WIDTH / (2 * effectiveRadius * BASE_SYSTEM_SCALE));
     currentScale = targetScale;
     applyScale();
     root.position.x = 0;
@@ -366,6 +385,13 @@ export const createSolarSystemScene = ({ targetEl, planets }) => {
     },
     getScaleRange() {
       return { min: MIN_ZOOM_SCALE, max: MAX_ZOOM_SCALE, initial: DEFAULT_ZOOM_SCALE };
+    },
+    setOrbitScale,
+    getOrbitScale() {
+      return currentOrbitScale;
+    },
+    getOrbitScaleRange() {
+      return { min: MIN_ORBIT_SCALE, max: MAX_ORBIT_SCALE, initial: DEFAULT_ORBIT_SCALE };
     },
     fitCorePlanetsToMarker
   };

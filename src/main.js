@@ -46,6 +46,8 @@ const startArButton = document.querySelector("#start-ar-btn");
 const zoomControls = document.querySelector("#zoom-controls");
 const zoomRange = document.querySelector("#zoom-range");
 const zoomValue = document.querySelector("#zoom-value");
+const orbitRange = document.querySelector("#orbit-range");
+const orbitValue = document.querySelector("#orbit-value");
 
 const solarScene = createSolarSystemScene({
   targetEl,
@@ -175,6 +177,24 @@ const updateZoomUi = (scale) => {
 const applySolarScale = (nextScale) => {
   const applied = solarScene.setScale(clampScale(nextScale));
   updateZoomUi(applied);
+  return applied;
+};
+
+const { min: minOrbitScale, max: maxOrbitScale, initial: initialOrbitScale } = solarScene.getOrbitScaleRange();
+
+orbitRange.min = String(minOrbitScale);
+orbitRange.max = String(maxOrbitScale);
+orbitRange.value = String(initialOrbitScale);
+
+const updateOrbitUi = (scale) => {
+  const fixed = scale.toFixed(2);
+  orbitRange.value = fixed;
+  orbitValue.textContent = `${fixed}x`;
+};
+
+const applyOrbitScale = (nextScale) => {
+  const applied = solarScene.setOrbitScale(nextScale);
+  updateOrbitUi(applied);
   return applied;
 };
 
@@ -375,6 +395,10 @@ const onZoomSliderInput = (event) => {
   applySolarScale(nextScale);
 };
 
+const onOrbitSliderInput = (event) => {
+  applyOrbitScale(Number(event.currentTarget.value));
+};
+
 const onPointerDown = (event) => {
   if (event.pointerType !== "touch" || !gameState.markerVisible || gameState.completed) {
     return;
@@ -431,6 +455,7 @@ const onPointerUp = (event) => {
 syncArViewport();
 startArButton.addEventListener("click", startAr);
 zoomRange.addEventListener("input", onZoomSliderInput);
+orbitRange.addEventListener("input", onOrbitSliderInput);
 window.addEventListener("resize", scheduleIosResizes);
 window.addEventListener("orientationchange", scheduleIosResizes);
 window.addEventListener("pointerdown", onPointerDown, { passive: true });
@@ -454,7 +479,7 @@ const renderLabels = () => {
       visible = true;
     } else {
       const anchor = latestPositions[label.displayPlanetId];
-      if (anchor && gameState.markerVisible && anchor.visible) {
+      if (anchor && gameState.markerVisible) {
         const zoomFactor = Math.sqrt(solarScene.getScale());
         const baseOffset = LABEL_OFFSET_BY_PLANET_ID[label.displayPlanetId] || 38;
         x = anchor.x;
