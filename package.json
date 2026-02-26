@@ -9,7 +9,7 @@
     "dev:host": "vite --host 0.0.0.0 --port 5173",
     "dev:remote": "node scripts/dev-remote.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
-    "tunnel": "lt --port 5173"
+    "tunnel": "node scripts/dev-remote.mjs"
   },
   "dependencies": {
     "canvas": "^2.11.2",
