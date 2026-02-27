@@ -143,3 +143,19 @@ Agregar readme.md para github
 
 Por favor cambiemos el marcador para que sea esta imagen:
 /Users/josearevalo/proyectos/academia-virtualis/assets/markers/marker-sistema-solar.png
+
+por favor realiza estos cambios:
+1. la etiqueta debe ser menos ancha, reducela en un 40%
+2. en el panel de sliders debe haber un botón de reset donde se restauren los valores por defecto:
+   - Zoom sistema solar: 1.5x
+   - Tamaño de órbitas: 2.5x
+   - Tamaño de planetas: 1.0x
+   - Velocidad de órbita: 0.7x
+   - Rotación X: -4°
+   - Rotación Y: 0°
+   - Rotación Z: 0°
+3. El color de la etiqueta en estado normal debe er negro
+4. Modifica el color de fondo de la etiqueta cuando comete un error a un rojo más claro
+5. Modifica el color de fonde de la etiqueta cuando está en el planeta correcto a un verte más claro
+7. Cada NFT tiene un estilo diferente, por favor muestra el nombre del estilo del NFT debajo de la imagen, el nombre de la imagen luego del último guión te indica cual es el nombre del estilo, por ejemplo si el archivo se llama `NFT-SistemaSolar-1-LooneyTunes.png` el estilo es Looney Tunes.
+6. Actualiza los posibles NFTs, he agregado más imágenes en el directorio y les he cambiado el nombre para cumplir la regla del punto anterior
