@@ -18,9 +18,15 @@ export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
   const retryBtn = document.querySelector("#retry-btn");
   const closeBtn = document.querySelector("#close-btn");
   const downloadBtn = document.querySelector("#download-btn");
+  const walletBtn = document.querySelector("#wallet-btn");
+  const galleryModal = document.querySelector("#gallery-modal");
+  const galleryGrid = document.querySelector("#gallery-grid");
+  const galleryEmpty = document.querySelector("#gallery-empty");
+  const galleryCloseBtn = document.querySelector("#gallery-close-btn");
 
   const labelElements = new Map();
   let currentNftImageSrc = "";
+  let galleryItems = [];
 
   retryBtn.addEventListener("click", onRetry);
   closeBtn.addEventListener("click", onClose);
@@ -29,6 +35,83 @@ export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
       onDownload?.(currentNftImageSrc);
     });
   }
+
+  const renderGallery = () => {
+    if (!galleryGrid || !galleryEmpty) {
+      return;
+    }
+
+    const hasItems = galleryItems.length > 0;
+    galleryEmpty.hidden = hasItems;
+    galleryGrid.hidden = !hasItems;
+    galleryGrid.replaceChildren();
+
+    if (!hasItems) {
+      return;
+    }
+
+    galleryItems.forEach((item) => {
+      const card = document.createElement("figure");
+      card.className = "gallery-card";
+
+      const image = document.createElement("img");
+      image.src = item.imageSrc;
+      image.alt = "NFT ganado";
+
+      const caption = document.createElement("figcaption");
+      const count = document.createElement("span");
+      count.className = "gallery-count";
+      count.textContent = `x${item.count}`;
+      caption.appendChild(count);
+
+      card.appendChild(image);
+      card.appendChild(caption);
+      galleryGrid.appendChild(card);
+    });
+  };
+
+  const openGallery = () => {
+    if (!galleryModal) {
+      return;
+    }
+    renderGallery();
+    galleryModal.hidden = false;
+  };
+
+  const closeGallery = () => {
+    if (!galleryModal) {
+      return;
+    }
+    galleryModal.hidden = true;
+  };
+
+  if (walletBtn) {
+    walletBtn.addEventListener("click", () => {
+      if (galleryModal && !galleryModal.hidden) {
+        closeGallery();
+        return;
+      }
+      openGallery();
+    });
+  }
+
+  if (galleryCloseBtn) {
+    galleryCloseBtn.addEventListener("click", closeGallery);
+  }
+
+  if (galleryModal) {
+    galleryModal.addEventListener("click", (event) => {
+      if (event.target === galleryModal) {
+        closeGallery();
+      }
+    });
+  }
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeGallery();
+    }
+  });
 
   labels.forEach((label) => {
     const element = document.createElement("button");
@@ -110,6 +193,16 @@ export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
       nftImage.src = imageSrc;
       nftFigure.hidden = false;
       actionButtons.hidden = false;
+    },
+    setGalleryItems(items) {
+      const nextItems = Array.isArray(items) ? items : [];
+      galleryItems = nextItems
+        .filter((item) => item && typeof item.imageSrc === "string")
+        .map((item) => ({
+          imageSrc: item.imageSrc,
+          count: Number.isFinite(Number(item.count)) && Number(item.count) > 0 ? Math.floor(Number(item.count)) : 1
+        }));
+      renderGallery();
     }
   };
 };

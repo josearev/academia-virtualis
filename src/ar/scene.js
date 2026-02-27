@@ -22,6 +22,8 @@ const DEFAULT_SPEED_SCALE = SCENE_CONFIG.speed.initial;
 const DEFAULT_ROTATION_X = ROTATION_CONFIG.x.initial;
 const DEFAULT_ROTATION_Y = ROTATION_CONFIG.y.initial;
 const DEFAULT_ROTATION_Z = ROTATION_CONFIG.z.initial;
+const ORBIT_RING_BASE_THICKNESS = 0.0016;
+const ORBIT_RING_THICKNESS_MULTIPLIER = 2;
 
 const degreesToRadians = (degrees) => degrees * (Math.PI / 180);
 
@@ -213,15 +215,20 @@ const createPlanetTexture = (three, planetId) => {
 };
 
 const createOrbitRing = (three, radius) => {
-  const segments = 64;
-  const points = [];
-  for (let i = 0; i <= segments; i++) {
-    const angle = (i / segments) * Math.PI * 2;
-    points.push(new three.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));
-  }
-  const geo = new three.BufferGeometry().setFromPoints(points);
-  const mat = new three.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.18 });
-  return new three.Line(geo, mat);
+  const thickness = ORBIT_RING_BASE_THICKNESS * ORBIT_RING_THICKNESS_MULTIPLIER;
+  const innerRadius = Math.max(0.0001, radius - thickness * 0.5);
+  const outerRadius = radius + thickness * 0.5;
+  const geometry = new three.RingGeometry(innerRadius, outerRadius, 96);
+  const material = new three.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.2,
+    side: three.DoubleSide,
+    depthWrite: false
+  });
+  const mesh = new three.Mesh(geometry, material);
+  mesh.rotation.x = -Math.PI / 2;
+  return mesh;
 };
 
 const createPlanetMesh = (three, planet) => {

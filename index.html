@@ -72,6 +72,14 @@
         &#9776;
       </button>
 
+      <button id="wallet-btn" type="button" aria-label="Abrir galería de NFTs">
+        <svg class="wallet-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M3 7.5A2.5 2.5 0 0 1 5.5 5h12A2.5 2.5 0 0 1 20 7.5V9h1.5A1.5 1.5 0 0 1 23 10.5v5a1.5 1.5 0 0 1-1.5 1.5H20v1.5a2.5 2.5 0 0 1-2.5 2.5h-12A2.5 2.5 0 0 1 3 18.5v-11ZM20 15h1v-4h-1a2 2 0 0 0 0 4Zm-2-8H5.5a.5.5 0 0 0 0 1H18V7Zm0 3H5v8.5a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5V17h-1a4 4 0 1 1 0-8h1v-.5A.5.5 0 0 0 18 10Z"
+          />
+        </svg>
+      </button>
+
       <section id="camera-gate" hidden>
         <h2>Actividad AR</h2>
         <p id="camera-gate-text">Iniciando camara AR automaticamente...</p>
@@ -98,6 +106,13 @@
           <button id="retry-btn" type="button">Volver a intentar</button>
           <button id="close-btn" type="button">Cerrar sitio</button>
         </div>
+      </section>
+
+      <section id="gallery-modal" class="overlay-modal overlay-modal--gallery" hidden>
+        <h1>Mi galería NFT</h1>
+        <p id="gallery-empty" hidden>Aún no has ganado NFTs. Completa la actividad para obtener uno.</p>
+        <div id="gallery-grid" hidden></div>
+        <button id="gallery-close-btn" type="button">Cerrar galería</button>
       </section>
     </div>
 

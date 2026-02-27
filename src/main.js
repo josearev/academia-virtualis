@@ -9,7 +9,7 @@ import {
 } from "./config/app-config.js";
 import { createDragController } from "./game/dragdrop.js";
 import { createGameState, findLabel, PLANETS } from "./game/state.js";
-import { awardRandomNft } from "./nft/gallery.js";
+import { awardRandomNft, getGallerySummary } from "./nft/gallery.js";
 import { createOverlay } from "./ui/overlay.js";
 
 const SUCCESS_TEXT = APP_CONFIG.successText;
@@ -49,6 +49,7 @@ const overlay = createOverlay({
     downloadNftImage(imageSrc);
   }
 });
+overlay.setGalleryItems(getGallerySummary());
 
 overlay.setProgress(gameState.correctCount, gameState.totalCount);
 overlay.setStatus(APP_CONFIG.autoStartStatusText, false);
@@ -991,6 +992,7 @@ const completeActivity = () => {
       completionCountdownIntervalId = null;
     }
     const nftImage = awardRandomNft();
+    overlay.setGalleryItems(getGallerySummary());
     overlay.showNftPopup(nftImage);
   }, COMPLETION_COUNTDOWN_SECONDS * 1000);
 };
