@@ -14,7 +14,8 @@ The app renders a 3D solar system anchored to a printed/onscreen AR marker. Stud
 - Correctness feedback (green check stamps + progress counter).
 - Completion sequence with countdown and confetti.
 - Random NFT assignment from local assets.
-- Local NFT gallery persistence in browser storage.
+- Wallet button + local NFT gallery with style labels and counters.
+- NFT gallery persistence in cookies.
 - Local vendor bundles (no CDN dependency at runtime).
 
 ## Tech Stack
@@ -131,7 +132,7 @@ TUNNEL_USER=myuser TUNNEL_PASSWORD='strong-pass' npm run dev:remote
 
 Default source image:
 
-- `assets/markers/marker-tech.png`
+- `assets/markers/marker-sistema-solar.png`
 
 Compile command:
 
@@ -161,14 +162,43 @@ This overwrites `assets/markers/marker-tech.png`.
 
 - Current implementation includes **9 labels/targets** (`Aciertos: 0/9`), including Pluto.
 - On completion, the app shows countdown, then assigns one random NFT from `assets/nfts/`.
-- NFT wins are stored in `localStorage` under key:
-  - `academia_virtualis_gallery_v1`
+- NFT wins are stored in cookies under key:
+  - `av_nft_gallery_v2`
+- Legacy migration: if old local data exists under `academia_virtualis_gallery_v1`, it is migrated to the cookie model.
+- Gallery cards are square (`1:1`), show full NFT artwork, style name, and win count (`xN`).
+
+### NFT style naming rule
+
+Style is derived from the filename segment after the last hyphen (`-`), before the extension.
+
+Example:
+
+- `NFT-SistemaSolar-1-LooneyTunes.png` -> `Looney Tunes`
+
+### Controls and reset
+
+- Sliders available:
+  - Solar system zoom
+  - Orbit size
+  - Planet size
+  - Orbit speed
+  - Rotation X/Y/Z
+- Preferences are persisted in cookies.
+- `Reset sliders` restores and persists defaults:
+  - Zoom: `1.5x`
+  - Orbit size: `2.5x`
+  - Planet size: `1.0x`
+  - Orbit speed: `0.7x`
+  - Rotation X: `-4°`
+  - Rotation Y: `0°`
+  - Rotation Z: `0°`
 
 ## iOS/Safari Notes
 
 - Camera access on iPhone/iPad requires **HTTPS** (or special localhost contexts).
 - For real-device validation, prefer `dev:remote` (HTTPS tunnel) or deployed URL.
 - If camera is blocked, verify browser permissions and secure context.
+- On iPad orientation changes, the app re-synchronizes AR scene/canvas/video viewport to avoid left-shift and right-side margins.
 
 ## Build and Deployment
 
@@ -194,8 +224,10 @@ For Cloudflare Pages setup and Node version guidance, see:
   - Camera permission prompt appears and is accepted.
   - Marker detection starts reliably.
   - Touch drag/drop interaction is usable.
+  - Rotate iPad portrait/landscape and verify AR viewport stays aligned (no lateral margin).
   - Full 9/9 completion flow works.
   - NFT modal appears; download/retry/close actions work.
+  - Wallet gallery shows square NFTs without crop, style label, and `xN` counters.
 
 ## Troubleshooting
 
