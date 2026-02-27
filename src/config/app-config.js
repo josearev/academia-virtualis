@@ -2,7 +2,7 @@
 // Este archivo concentra constantes y preferencias para facilitar ajustes sin tocar la logica.
 
 // Version visible en pantalla (subir +1 en sub-version por commit: 0.12 -> 0.13, etc).
-export const APP_VERSION = "0.15";
+export const APP_VERSION = "0.16";
 
 // Textos y valores globales del flujo principal.
 export const APP_CONFIG = {

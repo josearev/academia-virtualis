@@ -24,6 +24,7 @@ const INSECURE_CONTEXT_TEXT = APP_CONFIG.insecureContextText;
 const LABEL_OFFSET_BY_PLANET_ID = UI_PREFERENCES.labelOffsetByPlanetId;
 const CONFETTI_COLORS = UI_PREFERENCES.confettiColors;
 const CONFETTI_DENSITY_FACTOR = UI_PREFERENCES.confettiDensityFactor;
+const EXTRA_IOS_RESIZE_DELAYS_MS = [1000];
 
 const downloadNftImage = (imageSrc) => {
   if (!imageSrc) {
@@ -101,6 +102,7 @@ let pinchStartDistance = 0;
 let pinchStartScale = 1;
 let activeDragLabel = null;
 let controlsPanelCollapsed = true;
+let viewportSyncFrameId = null;
 const pinchPointers = new Map();
 const confettiCtx = confettiLayer?.getContext("2d");
 
@@ -303,38 +305,57 @@ const waitForMindarSystem = async (timeoutMs = MINDAR_WAIT_TIMEOUT_MS) => {
   throw new Error("El motor AR no se inicializo a tiempo.");
 };
 
+const getViewportMetrics = () => {
+  const visualViewport = window.visualViewport;
+  if (visualViewport) {
+    return {
+      width: Math.max(1, Math.round(visualViewport.width)),
+      height: Math.max(1, Math.round(visualViewport.height)),
+      left: Math.round(visualViewport.offsetLeft),
+      top: Math.round(visualViewport.offsetTop)
+    };
+  }
+  return {
+    width: Math.max(1, Math.round(window.innerWidth)),
+    height: Math.max(1, Math.round(window.innerHeight)),
+    left: 0,
+    top: 0
+  };
+};
+
+const applyViewportStyles = (element, metrics) => {
+  if (!element) {
+    return;
+  }
+  element.style.position = "fixed";
+  element.style.left = `${metrics.left}px`;
+  element.style.top = `${metrics.top}px`;
+  element.style.right = "auto";
+  element.style.bottom = "auto";
+  element.style.width = `${metrics.width}px`;
+  element.style.height = `${metrics.height}px`;
+};
+
 const syncArViewport = () => {
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  sceneEl.style.position = "fixed";
-  sceneEl.style.left = "0px";
-  sceneEl.style.top = "0px";
-  sceneEl.style.width = `${viewportWidth}px`;
-  sceneEl.style.height = `${viewportHeight}px`;
+  const metrics = getViewportMetrics();
+  applyViewportStyles(sceneEl, metrics);
 
   const canvasEl = sceneEl.canvas;
   if (canvasEl) {
-    canvasEl.style.position = "fixed";
-    canvasEl.style.left = "0px";
-    canvasEl.style.top = "0px";
-    canvasEl.style.width = `${viewportWidth}px`;
-    canvasEl.style.height = `${viewportHeight}px`;
+    applyViewportStyles(canvasEl, metrics);
   }
 
   const mindarSystem = sceneEl.systems?.["mindar-image-system"];
   const videoEl = mindarSystem?.video;
   if (videoEl) {
-    videoEl.style.position = "fixed";
-    videoEl.style.left = "0px";
-    videoEl.style.top = "0px";
-    videoEl.style.width = `${viewportWidth}px`;
-    videoEl.style.height = `${viewportHeight}px`;
+    applyViewportStyles(videoEl, metrics);
     videoEl.style.objectFit = "cover";
     videoEl.style.zIndex = "-2";
   }
 };
 
 const requestArResize = () => {
+  syncArViewport();
   const mindarSystem = sceneEl.systems?.["mindar-image-system"];
   if (mindarSystem && typeof mindarSystem._resize === "function") {
     try {
@@ -347,8 +368,25 @@ const requestArResize = () => {
 };
 
 const scheduleIosResizes = () => {
-  IOS_RESIZE_DELAYS_MS.forEach((delayMs) => {
+  requestArResize();
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      requestArResize();
+    });
+  });
+  [...IOS_RESIZE_DELAYS_MS, ...EXTRA_IOS_RESIZE_DELAYS_MS].forEach((delayMs) => {
     window.setTimeout(requestArResize, delayMs);
+  });
+};
+
+const onViewportMetricsChanged = () => {
+  if (viewportSyncFrameId !== null) {
+    return;
+  }
+  viewportSyncFrameId = window.requestAnimationFrame(() => {
+    viewportSyncFrameId = null;
+    scheduleIosResizes();
+    resizeConfettiLayer();
   });
 };
 
@@ -866,13 +904,15 @@ if (resetControlsButton) {
   resetControlsButton.addEventListener("click", resetControlsToDefaults);
 }
 window.addEventListener("resize", () => {
-  scheduleIosResizes();
-  resizeConfettiLayer();
+  onViewportMetricsChanged();
 });
 window.addEventListener("orientationchange", () => {
-  scheduleIosResizes();
-  resizeConfettiLayer();
+  onViewportMetricsChanged();
 });
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", onViewportMetricsChanged, { passive: true });
+  window.visualViewport.addEventListener("scroll", onViewportMetricsChanged, { passive: true });
+}
 window.addEventListener("pointerdown", onPointerDown, { passive: true });
 window.addEventListener("pointermove", onPointerMove, { passive: false });
 window.addEventListener("pointerup", onPointerUp, { passive: true });
