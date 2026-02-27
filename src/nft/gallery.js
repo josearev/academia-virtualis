@@ -1,9 +1,16 @@
 const COOKIE_KEY = "av_nft_gallery_v2";
 const COOKIE_MAX_AGE_DAYS = 180;
 const LEGACY_STORAGE_KEY = "academia_virtualis_gallery_v1";
+const UNKNOWN_STYLE_NAME = "Estilo desconocido";
 
-const NFT_POOL = Array.from({ length: 10 }, (_, index) => `/assets/nfts/NFT-SistemaSolar-${index + 1}.png`);
-const EMPTY_GALLERY = { counts: {}, order: [], lastWonAt: null };
+const nftModules = import.meta.glob("../../assets/nfts/*.{png,jpg,jpeg,webp,avif}", { eager: true });
+const NFT_POOL = Object.keys(nftModules)
+  .map((filePath) => filePath.split("/").pop())
+  .filter((fileName) => Boolean(fileName))
+  .map((fileName) => `/assets/nfts/${fileName}`)
+  .sort((first, second) => first.localeCompare(second, "es", { numeric: true, sensitivity: "base" }));
+
+const createEmptyGallery = () => ({ counts: {}, order: [], lastWonAt: null });
 
 const readCookieRaw = (key) => {
   const target = `${key}=`;
@@ -23,9 +30,38 @@ const persistCookie = (state) => {
   document.cookie = `${COOKIE_KEY}=${payload}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax`;
 };
 
+const extractStyleToken = (imageSrc) => {
+  if (typeof imageSrc !== "string" || imageSrc.length === 0) {
+    return "";
+  }
+  const fileName = imageSrc.split("/").pop() || "";
+  const fileNameWithoutExt = fileName.replace(/\.[^.]+$/, "");
+  const lastDashIndex = fileNameWithoutExt.lastIndexOf("-");
+  if (lastDashIndex < 0 || lastDashIndex >= fileNameWithoutExt.length - 1) {
+    return "";
+  }
+  return fileNameWithoutExt.slice(lastDashIndex + 1);
+};
+
+const normalizeStyleName = (token) => {
+  if (!token) {
+    return UNKNOWN_STYLE_NAME;
+  }
+  const withSpaces = token
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/\s+/g, " ")
+    .trim();
+  return withSpaces || UNKNOWN_STYLE_NAME;
+};
+
+export const getNftStyleName = (imageSrc) => {
+  return normalizeStyleName(extractStyleToken(imageSrc));
+};
+
 const normalizeState = (rawState) => {
   if (!rawState || typeof rawState !== "object") {
-    return { ...EMPTY_GALLERY };
+    return createEmptyGallery();
   }
 
   const counts = {};
@@ -98,7 +134,7 @@ const readGalleryState = () => {
       const parsed = JSON.parse(decodeURIComponent(rawCookie));
       return normalizeState(parsed);
     } catch {
-      return { ...EMPTY_GALLERY };
+      return createEmptyGallery();
     }
   }
 
@@ -109,7 +145,7 @@ const readGalleryState = () => {
     return normalizeState(migratedState);
   }
 
-  return { ...EMPTY_GALLERY };
+  return createEmptyGallery();
 };
 
 const persistGalleryState = (state) => {
@@ -122,11 +158,16 @@ export const getGallerySummary = () => {
     .filter((imageSrc) => state.counts[imageSrc] > 0)
     .map((imageSrc) => ({
       imageSrc,
+      styleName: getNftStyleName(imageSrc),
       count: state.counts[imageSrc]
     }));
 };
 
 export const awardRandomNft = () => {
+  if (NFT_POOL.length === 0) {
+    return { imageSrc: "", styleName: UNKNOWN_STYLE_NAME };
+  }
+
   const selected = NFT_POOL[Math.floor(Math.random() * NFT_POOL.length)];
   const state = readGalleryState();
 
@@ -135,5 +176,8 @@ export const awardRandomNft = () => {
   state.lastWonAt = new Date().toISOString();
 
   persistGalleryState(state);
-  return selected;
+  return {
+    imageSrc: selected,
+    styleName: getNftStyleName(selected)
+  };
 };

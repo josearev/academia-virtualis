@@ -14,6 +14,7 @@ export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
   const completionMessage = document.querySelector("#completion-message");
   const nftFigure = document.querySelector("#nft-figure");
   const nftImage = document.querySelector("#nft-image");
+  const nftStyleName = document.querySelector("#nft-style-name");
   const actionButtons = document.querySelector("#action-buttons");
   const retryBtn = document.querySelector("#retry-btn");
   const closeBtn = document.querySelector("#close-btn");
@@ -59,9 +60,14 @@ export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
       image.alt = "NFT ganado";
 
       const caption = document.createElement("figcaption");
+      const style = document.createElement("span");
+      style.className = "gallery-style";
+      style.textContent = item.styleName || "Estilo desconocido";
+
       const count = document.createElement("span");
       count.className = "gallery-count";
       count.textContent = `x${item.count}`;
+      caption.appendChild(style);
       caption.appendChild(count);
 
       card.appendChild(image);
@@ -184,13 +190,16 @@ export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
     updateCompletionCountdown(secondsLeft) {
       completionCountdownValue.textContent = String(secondsLeft);
     },
-    showNftPopup(imageSrc) {
+    showNftPopup(imageSrc, styleName = "Estilo desconocido") {
       completionModal.hidden = true;
       nftModal.hidden = false;
       nftFigure.hidden = true;
       actionButtons.hidden = true;
       currentNftImageSrc = imageSrc;
       nftImage.src = imageSrc;
+      if (nftStyleName) {
+        nftStyleName.textContent = styleName;
+      }
       nftFigure.hidden = false;
       actionButtons.hidden = false;
     },
@@ -200,6 +209,9 @@ export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
         .filter((item) => item && typeof item.imageSrc === "string")
         .map((item) => ({
           imageSrc: item.imageSrc,
+          styleName: typeof item.styleName === "string" && item.styleName.trim().length > 0
+            ? item.styleName.trim()
+            : "Estilo desconocido",
           count: Number.isFinite(Number(item.count)) && Number(item.count) > 0 ? Math.floor(Number(item.count)) : 1
         }));
       renderGallery();

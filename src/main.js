@@ -77,6 +77,7 @@ const rotationYRange = document.querySelector("#rotation-y-range");
 const rotationYValue = document.querySelector("#rotation-y-value");
 const rotationZRange = document.querySelector("#rotation-z-range");
 const rotationZValue = document.querySelector("#rotation-z-value");
+const resetControlsButton = document.querySelector("#reset-controls-btn");
 const versionCounter = document.querySelector("#version-counter");
 const confettiLayer = document.querySelector("#confetti-layer");
 
@@ -455,6 +456,12 @@ const initialZoomValue = getInitialSliderValue("zoom", minScale, maxScale, initi
 const initialOrbitValue = getInitialSliderValue("orbit", minOrbitScale, maxOrbitScale, initialOrbitScale);
 const initialPlanetValue = getInitialSliderValue("planet", minPlanetScale, maxPlanetScale, initialPlanetScale);
 const initialSpeedValue = getInitialSliderValue("speed", minSpeedScale, maxSpeedScale, initialSpeedScale);
+const rotationRange = solarScene.getRotationRange();
+const defaultRotationValues = {
+  x: rotationRange.x.initial,
+  y: rotationRange.y.initial,
+  z: rotationRange.z.initial
+};
 
 applySolarScale(initialZoomValue, { persist: false });
 applyOrbitScale(initialOrbitValue, { persist: false });
@@ -512,7 +519,6 @@ const applySolarRotation = (partialRotation = {}, { persist = true } = {}) => {
 
 if (rotationControlsEnabled) {
   rotationSection.hidden = false;
-  const rotationRange = solarScene.getRotationRange();
   rotationXRange.min = String(rotationRange.x.min);
   rotationXRange.max = String(rotationRange.x.max);
   rotationXRange.step = String(rotationRange.x.step);
@@ -532,6 +538,14 @@ if (rotationControlsEnabled) {
 } else if (rotationSection) {
   rotationSection.hidden = true;
 }
+
+const resetControlsToDefaults = () => {
+  applySolarScale(initialScale);
+  applyOrbitScale(initialOrbitScale);
+  applyPlanetScale(initialPlanetScale);
+  applyOrbitSpeed(initialSpeedScale);
+  applySolarRotation(defaultRotationValues);
+};
 
 const dragController = createDragController({
   canDrag: (labelId) => {
@@ -848,6 +862,9 @@ if (rotationControlsEnabled) {
   rotationYRange.addEventListener("input", onRotationYSliderInput);
   rotationZRange.addEventListener("input", onRotationZSliderInput);
 }
+if (resetControlsButton) {
+  resetControlsButton.addEventListener("click", resetControlsToDefaults);
+}
 window.addEventListener("resize", () => {
   scheduleIosResizes();
   resizeConfettiLayer();
@@ -991,9 +1008,9 @@ const completeActivity = () => {
       clearInterval(completionCountdownIntervalId);
       completionCountdownIntervalId = null;
     }
-    const nftImage = awardRandomNft();
+    const awardedNft = awardRandomNft();
     overlay.setGalleryItems(getGallerySummary());
-    overlay.showNftPopup(nftImage);
+    overlay.showNftPopup(awardedNft.imageSrc, awardedNft.styleName);
   }, COMPLETION_COUNTDOWN_SECONDS * 1000);
 };
 
