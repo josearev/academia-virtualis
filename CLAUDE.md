@@ -37,8 +37,14 @@ There is no test framework. Manual checks: desktop drag/drop, then iOS Safari (c
 - Example: `[Sonnet-4.6]: Implementa validación de drag and drop`
 
 Do not include `prompts.md` changes in feature commits.
+`prompts.md` is user-owned and must not be edited by agents; use `directivas.md` for agent-maintained session directives.
 
 PRs for UI/AR changes should include screenshots or video, commands run (`build`, marker compile, manual checks), and notes about iOS behavior.
+
+## Security & Configuration
+
+- Tunnel uses HTTP Basic Auth in `dev-remote`; keep credentials configurable via env vars.
+- Large generated folders (`dist/`, `node_modules/`) should stay untracked.
 
 ## Architecture Overview
 
