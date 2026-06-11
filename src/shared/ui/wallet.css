@@ -1,0 +1,128 @@
+/* Billetera de premios — compartida entre portada y juegos. Auto-contenida. */
+#wallet-btn {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 60;
+  display: grid;
+  place-content: center;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  border-radius: 999px;
+  border: 1px solid rgba(122, 158, 219, 0.72);
+  background: rgba(16, 41, 87, 0.92);
+  color: #eff6ff;
+  padding: 0;
+  cursor: pointer;
+}
+
+.wallet-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+#gallery-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: clamp(16px, 5vw, 40px);
+  overflow-y: auto;
+  background: rgba(2, 6, 17, 0.92);
+  color: #e7f1ff;
+  font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+#gallery-modal[hidden] {
+  display: none;
+}
+
+#gallery-modal h1 {
+  margin: 8px 0 0;
+  font-size: clamp(20px, 5vw, 28px);
+  text-align: center;
+}
+
+#gallery-empty {
+  text-align: center;
+  color: #bfd3ee;
+  max-width: 34rem;
+}
+
+#gallery-grid {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#gallery-grid[hidden] {
+  display: none;
+}
+
+.gallery-group-title {
+  margin: 8px 0 0;
+  font-size: 16px;
+  color: #ffd36a;
+  border-bottom: 1px solid rgba(122, 158, 219, 0.35);
+  padding-bottom: 6px;
+}
+
+.gallery-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.gallery-card {
+  margin: 0;
+  background: rgba(7, 18, 41, 0.74);
+  border: 1px solid rgba(122, 158, 219, 0.4);
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gallery-card img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+.gallery-card figcaption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.gallery-style {
+  color: #e7f1ff;
+}
+
+.gallery-count {
+  color: #ffd36a;
+  font-weight: 700;
+}
+
+#gallery-close-btn {
+  min-height: 44px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(122, 158, 219, 0.72);
+  background: rgba(16, 41, 87, 0.92);
+  color: #f4f8ff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}

@@ -3,7 +3,7 @@ import { OVERLAY_TEXTS } from "../config/app-config.js";
 const STATUS_TRACKING = OVERLAY_TEXTS.tracking;
 const STATUS_SCANNING = OVERLAY_TEXTS.scanning;
 
-export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
+export const createOverlay = ({ labels, onRetry, onDownload }) => {
   const statusPill = document.querySelector("#status-pill");
   const progressPill = document.querySelector("#progress-pill");
   const labelsLayer = document.querySelector("#labels-layer");
@@ -17,107 +17,17 @@ export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
   const nftStyleName = document.querySelector("#nft-style-name");
   const actionButtons = document.querySelector("#action-buttons");
   const retryBtn = document.querySelector("#retry-btn");
-  const closeBtn = document.querySelector("#close-btn");
   const downloadBtn = document.querySelector("#download-btn");
-  const walletBtn = document.querySelector("#wallet-btn");
-  const galleryModal = document.querySelector("#gallery-modal");
-  const galleryGrid = document.querySelector("#gallery-grid");
-  const galleryEmpty = document.querySelector("#gallery-empty");
-  const galleryCloseBtn = document.querySelector("#gallery-close-btn");
 
   const labelElements = new Map();
   let currentNftImageSrc = "";
-  let galleryItems = [];
 
   retryBtn.addEventListener("click", onRetry);
-  closeBtn.addEventListener("click", onClose);
   if (downloadBtn) {
     downloadBtn.addEventListener("click", () => {
       onDownload?.(currentNftImageSrc);
     });
   }
-
-  const renderGallery = () => {
-    if (!galleryGrid || !galleryEmpty) {
-      return;
-    }
-
-    const hasItems = galleryItems.length > 0;
-    galleryEmpty.hidden = hasItems;
-    galleryGrid.hidden = !hasItems;
-    galleryGrid.replaceChildren();
-
-    if (!hasItems) {
-      return;
-    }
-
-    galleryItems.forEach((item) => {
-      const card = document.createElement("figure");
-      card.className = "gallery-card";
-
-      const image = document.createElement("img");
-      image.src = item.imageSrc;
-      image.alt = "NFT ganado";
-
-      const caption = document.createElement("figcaption");
-      const style = document.createElement("span");
-      style.className = "gallery-style";
-      style.textContent = item.styleName || "Estilo desconocido";
-
-      const count = document.createElement("span");
-      count.className = "gallery-count";
-      count.textContent = `x${item.count}`;
-      caption.appendChild(style);
-      caption.appendChild(count);
-
-      card.appendChild(image);
-      card.appendChild(caption);
-      galleryGrid.appendChild(card);
-    });
-  };
-
-  const openGallery = () => {
-    if (!galleryModal) {
-      return;
-    }
-    renderGallery();
-    galleryModal.hidden = false;
-  };
-
-  const closeGallery = () => {
-    if (!galleryModal) {
-      return;
-    }
-    galleryModal.hidden = true;
-  };
-
-  if (walletBtn) {
-    walletBtn.addEventListener("click", () => {
-      if (galleryModal && !galleryModal.hidden) {
-        closeGallery();
-        return;
-      }
-      openGallery();
-    });
-  }
-
-  if (galleryCloseBtn) {
-    galleryCloseBtn.addEventListener("click", closeGallery);
-  }
-
-  if (galleryModal) {
-    galleryModal.addEventListener("click", (event) => {
-      if (event.target === galleryModal) {
-        closeGallery();
-      }
-    });
-  }
-
-  window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeGallery();
-    }
-  });
 
   labels.forEach((label) => {
     const element = document.createElement("button");
@@ -202,19 +112,6 @@ export const createOverlay = ({ labels, onRetry, onClose, onDownload }) => {
       }
       nftFigure.hidden = false;
       actionButtons.hidden = false;
-    },
-    setGalleryItems(items) {
-      const nextItems = Array.isArray(items) ? items : [];
-      galleryItems = nextItems
-        .filter((item) => item && typeof item.imageSrc === "string")
-        .map((item) => ({
-          imageSrc: item.imageSrc,
-          styleName: typeof item.styleName === "string" && item.styleName.trim().length > 0
-            ? item.styleName.trim()
-            : "Estilo desconocido",
-          count: Number.isFinite(Number(item.count)) && Number(item.count) > 0 ? Math.floor(Number(item.count)) : 1
-        }));
-      renderGallery();
     }
   };
 };
