@@ -5,27 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Operaciones — Academia Virtualis</title>
     <link rel="stylesheet" href="/src/juegos/operaciones/operaciones.css" />
-    <style>
-      #op-scene,
-      #op-scene canvas,
-      #op-scene video { position: fixed; inset: 0; width: 100vw; height: 100vh; }
-    </style>
     <script src="/vendor/aframe/aframe.min.js"></script>
     <script src="/vendor/mindar/mindar-image-aframe.prod.js"></script>
   </head>
   <body>
-    <a-scene
-      id="op-scene"
-      mindar-image="imageTargetSrc: /assets/targets/marker-sistema-solar.mind; autoStart: false; maxTrack: 1; uiLoading: no; uiScanning: no;"
-      color-space="sRGB"
-      renderer="colorManagement: true, physicallyCorrectLights"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false"
-      embedded
-    >
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-      <a-entity id="op-target" mindar-image-target="targetIndex: 0"></a-entity>
-    </a-scene>
+    <!-- La escena A-Frame (AR o modo prueba) la construye main.js según la URL. -->
     <script type="module" src="/src/juegos/operaciones/main.js"></script>
   </body>
 </html>

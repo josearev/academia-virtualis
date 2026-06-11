@@ -25,6 +25,44 @@ body {
   pointer-events: none;
 }
 
+/* ── Escena A-Frame (AR o modo prueba) detrás del overlay ───────────── */
+
+#op-scene,
+#op-scene canvas,
+#op-scene video {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 1;
+}
+
+/* Ocultar los botones que A-Frame inyecta (VR / AR / fullscreen). */
+.a-enter-vr,
+.a-enter-ar,
+.a-orientation-modal {
+  display: none !important;
+}
+
+/* ── Listo + ayuda visual (abajo) ───────────────────────────────────── */
+
+.op-ready-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 60;
+}
+
+.op-ready-wrap > * {
+  pointer-events: auto;
+}
+
 /* ── Volver al catálogo ─────────────────────────────────────────────── */
 
 .back-to-catalog {
