@@ -9,11 +9,11 @@ import {
 } from "./config/app-config.js";
 import { createDragController } from "./game/dragdrop.js";
 import { createGameState, findLabel, PLANETS } from "./game/state.js";
-import { awardRandomNft, getGallerySummary } from "./nft/gallery.js";
+import { awardRandomNft } from "../../shared/nft/gallery.js";
+import { createWallet } from "../../shared/ui/wallet.js";
 import { createOverlay } from "./ui/overlay.js";
 
 const SUCCESS_TEXT = APP_CONFIG.successText;
-const RETURN_URL = APP_CONFIG.returnUrl;
 const SNAP_DISTANCE = APP_CONFIG.snapDistance;
 const COMPLETION_COUNTDOWN_SECONDS = APP_CONFIG.completionCountdownSeconds;
 const CONFETTI_DURATION_MS = COMPLETION_COUNTDOWN_SECONDS * 1000;
@@ -43,14 +43,11 @@ const gameState = createGameState();
 const overlay = createOverlay({
   labels: gameState.labels,
   onRetry: () => window.location.reload(),
-  onClose: () => {
-    window.location.href = RETURN_URL;
-  },
   onDownload: (imageSrc) => {
     downloadNftImage(imageSrc);
   }
 });
-overlay.setGalleryItems(getGallerySummary());
+const wallet = createWallet();
 
 overlay.setProgress(gameState.correctCount, gameState.totalCount);
 overlay.setStatus(APP_CONFIG.autoStartStatusText, false);
@@ -1048,8 +1045,8 @@ const completeActivity = () => {
       clearInterval(completionCountdownIntervalId);
       completionCountdownIntervalId = null;
     }
-    const awardedNft = awardRandomNft();
-    overlay.setGalleryItems(getGallerySummary());
+    const awardedNft = awardRandomNft("sistema-solar");
+    wallet.refresh();
     overlay.showNftPopup(awardedNft.imageSrc, awardedNft.styleName);
   }, COMPLETION_COUNTDOWN_SECONDS * 1000);
 };
