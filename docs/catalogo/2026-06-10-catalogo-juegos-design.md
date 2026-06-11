@@ -52,10 +52,11 @@ src/
   styles.css                        ← compartido; se le agregan estilos de portada y se mantiene wallet/galería
 ```
 
-**Catálogo de juegos (fuente única de datos):** un arreglo en `src/catalogo/catalogo.js`
-(o `src/shared/games.js`) describe cada juego: `{ id, nombre, descripcion, emoji, color, url, estado }`
-donde `estado ∈ { 'disponible', 'proximamente' }`. La portada y la billetera leen de aquí
-(la billetera usa `id`/`nombre` para etiquetar los grupos).
+**Catálogo de juegos (fuente única de datos):** un arreglo en **`src/shared/games.js`**
+describe cada juego: `{ id, nombre, descripcion, emoji, color, url, estado }`
+donde `estado ∈ { 'disponible', 'proximamente' }`. Vive en `shared/` porque tanto la portada
+como la billetera (en `shared/`) lo necesitan: la billetera usa `id`/`nombre` para etiquetar
+los grupos de premios. Así se evita una dependencia `shared → catalogo`.
 
 ## 4. Componentes y responsabilidades
 
@@ -108,6 +109,7 @@ No distingue de qué juego vino el premio.
 - **API:**
   - `awardRandomNft(gameId)` — incrementa el premio dentro de `games[gameId]`.
   - `getGallerySummary()` — devuelve los grupos por juego: `[{ gameId, nombre, items: [{ imageSrc, styleName, count }] }]`.
+    Los juegos **sin premios** (p. ej. Operaciones antes de tener mecánica) **se omiten** (no se muestra encabezado vacío).
 - **Migración:** al leer, si existe cookie `v2` (formato plano) o el legacy localStorage,
   se envuelve bajo `games["sistema-solar"]` y se reescribe como `v3`. Así los premios ya
   ganados se conservan, etiquetados como Sistema Solar. Se mantiene la lógica de migración
