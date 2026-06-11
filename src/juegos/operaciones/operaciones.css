@@ -63,6 +63,44 @@ body {
   pointer-events: auto;
 }
 
+/* ── Control de zoom (abajo-derecha) ─────────────────────────────────── */
+
+.op-zoom {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 65;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(122, 158, 219, 0.72);
+  background: rgba(16, 41, 87, 0.86);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+.op-zoom-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #d9e3ff;
+  white-space: nowrap;
+}
+
+.op-zoom-range {
+  width: 110px;
+  accent-color: #23b58a;
+}
+
+.op-zoom-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffd76a;
+  min-width: 42px;
+  text-align: right;
+}
+
 /* ── Volver al catálogo ─────────────────────────────────────────────── */
 
 .back-to-catalog {

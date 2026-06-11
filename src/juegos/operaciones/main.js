@@ -1,7 +1,13 @@
 import { generateOperation, generateOptions } from "./mathgen.js";
 import { createOperacionesUI } from "./ui.js";
 import { createScene3D } from "./scene3d.js";
-import { isNoMarkerMode, pickRandomBackground } from "./config.js";
+import {
+  isNoMarkerMode,
+  pickRandomBackground,
+  ZOOM_RANGE,
+  getZoomFromCookie,
+  saveZoomToCookie
+} from "./config.js";
 
 const ui = createOperacionesUI();
 ui.mount();
@@ -146,6 +152,20 @@ const runGame = async (scene3d) => {
 const boot = async () => {
   await waitForScene();
   const scene3d = createScene3D({ sceneEl, anchorEl });
+
+  // Control de zoom (escala los objetos 3D), persistido en cookie.
+  const initialZoom = getZoomFromCookie();
+  scene3d.setScale(initialZoom);
+  ui.mountZoom({
+    value: initialZoom,
+    min: ZOOM_RANGE.min,
+    max: ZOOM_RANGE.max,
+    step: ZOOM_RANGE.step,
+    onInput: (n) => {
+      scene3d.setScale(n);
+      saveZoomToCookie(n);
+    }
+  });
 
   if (!noMarker) {
     // iOS Safari exige un gesto del usuario para encender la cámara: mostramos un botón.
