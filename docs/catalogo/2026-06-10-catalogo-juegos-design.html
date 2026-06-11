@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Diseño — Catálogo de juegos · Academia Virtualis</title>
+<style>
+  :root {
+    --bg: #f6f7fb;
+    --surface: #ffffff;
+    --ink: #1d2030;
+    --muted: #5b6178;
+    --line: #e6e8f0;
+    --accent: #6a4bd6;
+    --accent-soft: #efeaff;
+    --solar: #6a4bd6;
+    --math: #15a37a;
+    --warn: #c98a00;
+    --warn-soft: #fff6e0;
+    --radius: 14px;
+    --shadow: 0 6px 24px rgba(30, 25, 70, .06);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6; font-size: 16px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  header.hero {
+    background: linear-gradient(135deg, #2a1a5e, #6a4bd6);
+    color: #fff; border-radius: 18px; padding: 28px 26px; box-shadow: var(--shadow);
+  }
+  header.hero h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: .2px; }
+  header.hero p { margin: 0; opacity: .9; font-size: 14.5px; }
+  .badges { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge { background: rgba(255,255,255,.16); color: #fff; font-size: 12px;
+    padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+
+  section.card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px 24px; margin-top: 20px; box-shadow: var(--shadow);
+  }
+  h2 { font-size: 20px; margin: 0 0 12px; display: flex; align-items: center; gap: 9px; }
+  h2 .n { background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 800;
+    width: 26px; height: 26px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; }
+  h3 { font-size: 15.5px; margin: 18px 0 8px; color: var(--ink); }
+  p, li { color: var(--ink); }
+  .muted { color: var(--muted); }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: .4px; }
+  tr:last-child td { border-bottom: none; }
+
+  pre.tree, pre.code {
+    background: #14172a; color: #e8ebff; border-radius: 12px; padding: 16px 18px; overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.55;
+  }
+  pre.code .k { color: #ff9ed8; }
+  code.inline { background: #f0f1f7; border: 1px solid var(--line); border-radius: 6px;
+    padding: 1px 6px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+
+  .note { border-left: 4px solid var(--warn); background: var(--warn-soft); border-radius: 8px;
+    padding: 12px 14px; margin: 14px 0; font-size: 14.5px; }
+  .note b { color: var(--warn); }
+
+  .pill { display:inline-block; font-size:12px; font-weight:700; padding:3px 9px; border-radius:999px; }
+  .pill.ok { background:#e3f6ee; color:#0c8a5f; }
+  .pill.soon { background:#fdeccc; color:#a06b00; }
+
+  .mermaid { background: #fbfbfe; border: 1px dashed var(--line); border-radius: 12px;
+    padding: 14px; margin: 14px 0; text-align: center; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 620px) { .cols { grid-template-columns: 1fr; } }
+  .mini { background: #fafaff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .mini h4 { margin: 0 0 6px; font-size: 14px; }
+  .foot { text-align:center; color: var(--muted); font-size: 13px; margin-top: 28px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>🎮 Catálogo de juegos — Diseño</h1>
+    <p>Academia Virtualis · de un juego a una colección de juegos AR</p>
+    <div class="badges">
+      <span class="badge">📅 2026-06-10</span>
+      <span class="badge">✅ Spec aprobado</span>
+      <span class="badge">👨‍👦 Proyecto de José &amp; Lucas (11)</span>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2><span class="n">1</span> ¿Qué vamos a hacer?</h2>
+    <p>Hoy la app es <b>un solo juego</b>: el Sistema Solar. Lo vamos a convertir en un
+    <b>catálogo</b> — una portada tipo menú de consola donde eliges a qué juego entrar.</p>
+    <p>El juego del Sistema Solar se mudará a su propia página, y agregamos un segundo juego,
+    <b>Operaciones matemáticas</b>, que por ahora dirá <span class="pill soon">🚧 Próximamente</span>
+    (su forma de jugar la diseñamos después).</p>
+
+    <h3>La idea en un dibujo</h3>
+    <pre class="mermaid">
+flowchart TD
+    P["🏠 Portada<br/>(catálogo de juegos)"]
+    S["🪐 Sistema Solar<br/>(juego AR)"]
+    O["➗ Operaciones<br/>(🚧 Próximamente)"]
+    W["🏆 Billetera de premios"]
+
+    P -->|tocar tarjeta| S
+    P -->|tocar tarjeta| O
+    S -->|« Volver| P
+    O -->|« Volver| P
+    P -.abre.-> W
+    S -.abre.-> W
+
+    classDef solar fill:#efeaff,stroke:#6a4bd6,color:#2a1a5e;
+    classDef math fill:#e3f6ee,stroke:#15a37a,color:#0c5a44;
+    classDef home fill:#fff,stroke:#6a4bd6,color:#2a1a5e,stroke-width:2px;
+    class P home; class S solar; class O math;
+    </pre>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span> Decisiones que ya tomamos</h2>
+    <table>
+      <tr><th>Tema</th><th>Decisión</th></tr>
+      <tr><td>Arquitectura</td><td><b>Multipágina (MPA)</b>: cada juego es su propia página HTML con su propia escena AR. La portada no carga AR.</td></tr>
+      <tr><td>Marcador AR</td><td><b>Compartido</b> 🔑: todos los juegos usan el mismo marcador. No hay uno por juego.</td></tr>
+      <tr><td>Portada</td><td><b>Lista de juegos</b> (tarjetas compactas, estilo menú de apps). Con fila "Próximamente" para futuros juegos.</td></tr>
+      <tr><td>Volver al menú</td><td>Cada juego tiene botón <b>«‹ Volver»</b> que regresa a la portada.</td></tr>
+      <tr><td>Operaciones</td><td>Página <b>"🚧 Próximamente"</b>; el enlace funciona, el juego real viene después.</td></tr>
+      <tr><td>Premios 🏆</td><td><b>Un solo cofre</b>, pero cada premio recuerda <b>de qué juego vino</b>; la galería los muestra agrupados por juego.</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span> Cómo se organizan los archivos</h2>
+    <p class="muted">Como una casa con habitaciones: cada juego tiene la suya, y lo que comparten vive en una caja de herramientas común (<code class="inline">shared/</code>).</p>
+    <pre class="tree">
+index.html                          ← 🏠 Portada / catálogo (sin AR)
+juegos/
+  sistema-solar/index.html          ← 🪐 Juego solar (el HTML que hoy está en index.html)
+  operaciones/index.html            ← ➗ Juego de mates: pantalla "Próximamente"
+vite.config.js                      ← 🆕 declara las 3 páginas (multipágina)
+
+src/
+  catalogo/catalogo.js              ← cerebro de la portada
+  juegos/
+    sistema-solar/                  ← todo el código del juego solar (hoy suelto en src/)
+    operaciones/main.js             ← stub "Próximamente"
+  shared/                           ← 🧰 CAJA COMPARTIDA
+    games.js                        ← lista de juegos (fuente única de datos)
+    nft/gallery.js                  ← almacenamiento de premios + gameId
+    ui/wallet.js                    ← botón 🏆 + galería (usable en cualquier página)
+  styles.css                        ← estilos compartidos</pre>
+
+    <h3>Quién usa qué (la caja compartida)</h3>
+    <pre class="mermaid">
+flowchart LR
+    subgraph SH["🧰 shared/"]
+      G["games.js"]
+      WAL["ui/wallet.js"]
+      NFT["nft/gallery.js"]
+    end
+    CAT["🏠 catalogo.js"]
+    SOL["🪐 sistema-solar"]
+
+    CAT --> G
+    CAT --> WAL
+    SOL --> WAL
+    WAL --> NFT
+    NFT --> G
+
+    classDef sh fill:#f3f0ff,stroke:#6a4bd6,color:#2a1a5e;
+    class G,WAL,NFT sh;
+    </pre>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">4</span> Las piezas y qué hace cada una</h2>
+    <div class="cols">
+      <div class="mini">
+        <h4>📋 Portada</h4>
+        <p class="muted">Título + botón 🏆. Lista de tarjetas (🪐 Sistema Solar, ➗ Operaciones). Tocar = entrar. No carga la cámara → abre rapidísimo.</p>
+      </div>
+      <div class="mini">
+        <h4>🪐 Sistema Solar</h4>
+        <p class="muted">Se muda tal cual a su página (mismo marcador, misma cámara). Se le agrega el botón «‹ Volver».</p>
+      </div>
+      <div class="mini">
+        <h4>➗ Operaciones</h4>
+        <p class="muted">Página mínima con cartel "🚧 Próximamente" y «‹ Volver». Aún no inicia AR.</p>
+      </div>
+      <div class="mini">
+        <h4>🏆 Billetera</h4>
+        <p class="muted">Botón + galería de premios agrupados por juego. Vive en <code class="inline">shared/</code> para usarse en todos lados.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">5</span> La billetera de premios (cómo guarda los datos)</h2>
+    <p>Hoy todos los premios se guardan juntos sin saber de qué juego vienen. Le agregamos esa
+    información (<code class="inline">gameId</code>) y conservamos los premios que ya tengas ganados.</p>
+    <pre class="mermaid">
+flowchart TD
+    A["¿Hay premios guardados<br/>en el formato viejo (v2)?"]
+    B["Envolverlos bajo<br/>games['sistema-solar']"]
+    C["Guardar en formato nuevo (v3)"]
+    D["Empezar cofre vacío (v3)"]
+    A -->|Sí| B --> C
+    A -->|No| D
+    classDef step fill:#fff,stroke:#6a4bd6,color:#2a1a5e;
+    class A,B,C,D step;
+    </pre>
+    <p class="muted">Formato nuevo (cookie <code class="inline">av_nft_gallery_v3</code>):</p>
+    <pre class="code">{
+  <span class="k">games</span>: {
+    "sistema-solar": { counts: { ... }, order: [ ... ] },
+    "operaciones":   { counts: { ... }, order: [ ... ] }
+  },
+  <span class="k">lastWonAt</span>: "fecha"
+}</pre>
+    <p class="muted">Los juegos sin premios todavía (como Operaciones) no muestran encabezado vacío en la galería.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">6</span> Qué construimos ahora y qué después</h2>
+    <div class="cols">
+      <div class="mini">
+        <h4><span class="pill ok">Ahora</span></h4>
+        <ul style="margin:8px 0 0; padding-left:18px;">
+          <li>Portada con lista de juegos</li>
+          <li>Mudar el Sistema Solar a su carpeta</li>
+          <li>Botón «‹ Volver» en los juegos</li>
+          <li>Página "Próximamente" de Operaciones</li>
+          <li>Billetera 🏆 compartida con <code class="inline">gameId</code></li>
+          <li><code class="inline">vite.config.js</code> para multipágina</li>
+        </ul>
+      </div>
+      <div class="mini">
+        <h4><span class="pill soon">Después</span></h4>
+        <ul style="margin:8px 0 0; padding-left:18px;">
+          <li>La mecánica real del juego de Operaciones (José la explica y hacemos otro plan)</li>
+          <li>Refactor interno del <code class="inline">main.js</code> del solar (no ahora)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>A confirmar:</b> el botón <b>«Cerrar»</b> que aparece después de ganar el NFT,
+      ¿ahora regresa a la <b>portada</b> en vez de ir a la web externa de Canva? (Tiene sentido
+      en un mundo de catálogo. Riesgo bajo.)
+    </div>
+  </section>
+
+  <p class="foot">Academia Virtualis · documento de diseño generado para la hackathon de Lucas 🚀</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: "default", securityLevel: "loose",
+    flowchart: { curve: "basis", htmlLabels: true } });
+</script>
+</body>
+</html>
