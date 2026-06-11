@@ -15,7 +15,6 @@
     --accent-soft: #e3f6ee;
     --warn: #c98a00;
     --warn-soft: #fff6e0;
-    --energy: #23b58a;
     --radius: 14px;
     --shadow: 0 6px 24px rgba(30, 25, 70, .06);
   }
@@ -39,7 +38,6 @@
   h2.section { font-size: 19px; margin: 30px 0 4px; }
   p.lead { color: var(--muted); margin: 0 0 16px; }
 
-  /* Storyboard grid */
   .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   @media (max-width: 880px) { .board { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 560px) { .board { grid-template-columns: 1fr; } }
@@ -49,54 +47,65 @@
   .panel .num { position: absolute; top: 10px; left: 10px; width: 26px; height: 26px; border-radius: 8px;
     background: var(--accent); color: #fff; font-weight: 800; font-size: 13px; display: grid; place-content: center; z-index: 3; }
   .screen { position: relative; aspect-ratio: 3/4; background: linear-gradient(160deg, #0b1026, #14172a 70%);
-    display: flex; align-items: center; justify-content: center; padding: 16px; }
+    display: flex; align-items: center; justify-content: center; padding: 16px; overflow: hidden; }
   .cap { padding: 12px 14px 16px; }
   .cap h3 { margin: 0 0 4px; font-size: 14.5px; }
   .cap p { margin: 0; font-size: 12.5px; color: var(--muted); }
 
-  /* Screen building blocks */
   .marker-hint { position: absolute; inset: 10px; border: 2px dashed rgba(122,158,219,.35); border-radius: 12px; }
   .stk { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 10px; color: #fff; text-align: center; width: 100%; }
-  .op { font-size: 30px; font-weight: 800; letter-spacing: 1px; color: #fff; }
-  .op small { color: #9fb0d6; font-weight: 600; }
+  .pill-top { position: absolute; top: 12px; right: 12px; z-index: 3; background: rgba(255,255,255,.14); color: #d9e3ff; font-size: 10.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px; }
+
+  /* 3D-looking operation */
+  .op3d { font-size: 30px; font-weight: 900; color: #fff; letter-spacing: 1px;
+    text-shadow: 0 2px 0 #2a3a6b, 0 4px 0 #1a2750, 0 7px 10px rgba(0,0,0,.5); }
+  .op3d small { display:block; font-size: 11px; color: #9fb0d6; font-weight: 600; text-shadow:none; margin-top:2px; }
   .ready-btn { background: #ffd76a; color: #2a1a5e; font-weight: 800; font-size: 13px; padding: 7px 16px; border-radius: 999px; }
-  .pill-top { position: absolute; top: 12px; right: 12px; z-index: 3; background: rgba(255,255,255,.14); color: #d9e3ff; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 999px; }
 
-  .energy { width: 120px; height: 120px; border-radius: 50%;
-    background: conic-gradient(from 0deg, #ff6b6b, #ffd76a, #6ff0c9, #58a6ff, #b08bff, #ff6b6b);
-    box-shadow: 0 0 0 6px rgba(255,255,255,.12), 0 0 36px rgba(120,200,255,.5);
-    display: grid; place-content: center; position: relative; }
-  .energy::after { content: ""; position: absolute; inset: 26px; border-radius: 50%;
-    background: rgba(255,255,255,.82); }
-  .energy .opmini, .energy .draw { position: relative; z-index: 2; }
-  .energy .opmini { font-size: 16px; font-weight: 800; color: #1d2030; }
-  .confirm-btn { background: #15a37a; color: #fff; font-weight: 800; font-size: 12px; padding: 7px 16px; border-radius: 999px; border: 1px solid #6ff0c9; }
+  /* Visual hint (cajitas) for levels 1-2 */
+  .hint { display: flex; gap: 14px; align-items: flex-end; }
+  .hint .group { display: flex; gap: 3px; }
+  .hint .cube { width: 12px; height: 12px; border-radius: 3px; background: #6ff0c9; box-shadow: inset 0 -3px 0 rgba(0,0,0,.2); }
+  .hint .cube.b { background: #ffd76a; }
+  .hint .plus { color:#cdd8f5; font-weight:800; }
 
-  .draw { font-family: "Comic Sans MS", "Bradley Hand", cursive; font-size: 54px; font-weight: 800;
-    color: #15a37a; -webkit-text-stroke: 2px #0e7a5f; }
-  .finger { position: absolute; bottom: 14px; right: 22px; font-size: 30px; }
+  /* Dragon Ball ki energy ball */
+  .energy { width: 116px; height: 116px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 42%, #ffffff 0%, #fff3b0 26%, #ffd76a 42%, #6ff0c9 60%, #58a6ff 78%, #b08bff 100%);
+    box-shadow: 0 0 16px 6px rgba(255,235,150,.85), 0 0 48px 16px rgba(120,200,255,.55), inset 0 0 22px rgba(255,255,255,.75);
+    display: grid; place-content: center; position: relative; animation: ki 1.6s ease-in-out infinite; }
+  @keyframes ki { 0%,100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.06); filter: brightness(1.15); } }
+  .energy .opmini { font-size: 15px; font-weight: 900; color: #1d2030; position: relative; z-index: 2; }
+  .energy.target { box-shadow: 0 0 16px 6px rgba(255,235,150,.85), 0 0 48px 16px rgba(120,200,255,.55), inset 0 0 22px rgba(255,255,255,.75), 0 0 0 3px rgba(111,240,201,.7); }
+
+  /* Answer option spheres */
+  .opts { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .opt-sphere { width: 40px; height: 40px; border-radius: 50%; display: grid; place-content: center;
+    font-weight: 900; font-size: 16px; color: #06291f;
+    background: radial-gradient(circle at 35% 30%, #ffffff, #cfe9ff 45%, #7fb6f0 100%);
+    box-shadow: 0 3px 8px rgba(0,0,0,.35), inset 0 0 8px rgba(255,255,255,.7); }
+  .opt-sphere.correct { background: radial-gradient(circle at 35% 30%, #ffffff, #b6f0d6 45%, #34c98a 100%); }
+  .drag-arrow { position: absolute; left: 50%; top: 46%; transform: translateX(-50%); font-size: 22px; color:#ffd76a; z-index:3; }
+  .finger { position: absolute; bottom: 30px; right: 30px; font-size: 28px; z-index: 4; }
 
   .result-ok { color: #6ff0c9; font-size: 18px; font-weight: 800; }
-  .result-bad { color: #ff8a8a; font-size: 16px; font-weight: 800; }
+  .result-bad { color: #ff8a8a; font-size: 15px; font-weight: 800; }
   .choices { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
   .choice { background: rgba(255,255,255,.12); color: #eaf0ff; font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(122,158,219,.4); }
 
   .levels { display: flex; gap: 8px; }
-  .lvl { width: 38px; height: 46px; border-radius: 10px; background: rgba(255,255,255,.10); border: 1px solid rgba(122,158,219,.4);
-    display: grid; place-content: center; font-weight: 800; color: #eaf0ff; font-size: 16px; }
+  .lvl { width: 40px; border-radius: 10px; background: rgba(255,255,255,.10); border: 1px solid rgba(122,158,219,.4);
+    display: flex; flex-direction:column; align-items:center; gap:2px; padding:7px 0; color: #eaf0ff; }
+  .lvl b { font-size: 16px; }
+  .lvl span { font-size: 9px; color:#9fb0d6; }
   .lvl.sel { background: #23b58a; color: #06291f; border-color: #6ff0c9; }
+  .lvl.sel span { color:#06291f; }
 
-  /* Doubt badge */
-  .doubt { position: absolute; z-index: 4; background: var(--warn); color: #fff; font-size: 11px; font-weight: 800;
-    padding: 3px 8px; border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,.3); }
-
-  /* Mermaid + notes */
   .mermaid { background: #fbfbfe; border: 1px dashed var(--line); border-radius: 12px; padding: 14px; margin: 8px 0 0; text-align: center; }
-  .notecard { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
-  .notecard h3 { margin: 0 0 8px; font-size: 15px; color: var(--warn); }
-  .notecard ol { margin: 0; padding-left: 20px; }
+  .notecard { background: var(--accent-soft); border-left: 4px solid var(--accent); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
+  .notecard h3 { margin: 0 0 8px; font-size: 15px; color: #0c8a5f; }
+  .notecard ul { margin: 0; padding-left: 20px; }
   .notecard li { margin: 6px 0; font-size: 14px; }
-  .q-tag { display: inline-block; background: var(--warn); color: #fff; font-size: 11px; font-weight: 800; border-radius: 6px; padding: 1px 6px; margin-right: 4px; }
   .foot { text-align:center; color: var(--muted); font-size: 13px; margin-top: 30px; }
 </style>
 </head>
@@ -105,17 +114,17 @@
 
   <header class="hero">
     <h1>➗ Juego de Operaciones — Storyboard</h1>
-    <p>El juego de mates de Lucas, ya aclarado con sus respuestas. ✅</p>
+    <p>El juego de mates de Lucas, en realidad aumentada sobre el marcador. 🔮</p>
     <div class="badges">
-      <span class="badge">📅 2026-06-10</span>
-      <span class="badge">🎯 Desde 2.º año en adelante</span>
-      <span class="badge">📷 AR sobre el marcador</span>
-      <span class="badge">🌈 Bolita de colores</span>
+      <span class="badge">📅 2026-06-10 · v2</span>
+      <span class="badge">🧒 Nivel 1 ≈ 7 años · Nivel 4 ≈ 11 años</span>
+      <span class="badge">🧊 Números 3D sobre el marcador</span>
+      <span class="badge">🔮 Bola de energía estilo Dragon Ball</span>
     </div>
   </header>
 
   <h2 class="section">📖 El juego, paso a paso</h2>
-  <p class="lead">Cada cuadro es una pantalla del juego, en orden. Léelos como una historieta (de izquierda a derecha).</p>
+  <p class="lead">Cada cuadro es una pantalla del juego, en orden. Léelos como una historieta.</p>
 
   <div class="board">
 
@@ -126,69 +135,80 @@
         <div class="stk">
           <div style="font-size:13px; color:#cdd8f5; font-weight:700;">Elige el nivel</div>
           <div class="levels">
-            <div class="lvl sel">1</div>
-            <div class="lvl">2</div>
-            <div class="lvl">3</div>
-            <div class="lvl">4</div>
+            <div class="lvl sel"><b>1</b><span>~7 años</span></div>
+            <div class="lvl"><b>2</b><span>~8 años</span></div>
+            <div class="lvl"><b>3</b><span>~10 años</span></div>
+            <div class="lvl"><b>4</b><span>~11 años</span></div>
           </div>
           <div style="font-size:11px; color:#9fb0d6;">Nivel 1 fácil · Nivel 4 difícil</div>
         </div>
       </div>
       <div class="cap">
         <h3>Eliges la dificultad</h3>
-        <p>Antes de <b>cada</b> operación eliges el nivel. Nivel 1: fácil (4×4). Nivel 4: difícil (raíz cúbica de 27, etc.).</p>
+        <p>Nivel 1 (~7 años): sumas fáciles. Nivel 4 (~11 años): retos difíciles (raíz cúbica, etc.).</p>
       </div>
     </div>
 
-    <!-- 2: Operación aleatoria + Listo -->
+    <!-- 2: Operación 3D + ayuda visual -->
     <div class="panel">
       <div class="screen">
         <span class="num">2</span>
         <div class="marker-hint"></div>
-        <span class="pill-top">📷 cámara AR</span>
+        <span class="pill-top">📷 3D sobre el marcador</span>
         <div class="stk">
-          <div class="op">7 × 8 <br><small>operación aleatoria</small></div>
+          <div class="op3d">3 + 2 <small>operación aleatoria</small></div>
+          <div class="hint">
+            <div class="group"><div class="cube"></div><div class="cube"></div><div class="cube"></div></div>
+            <span class="plus">+</span>
+            <div class="group"><div class="cube b"></div><div class="cube b"></div></div>
+          </div>
           <div class="ready-btn">⚡ Listo</div>
         </div>
       </div>
       <div class="cap">
-        <h3>Aparece una operación</h3>
-        <p>Sale una operación al azar (ej. 2+3 o 10×6) en la pantalla. Aparece el icono <b>“Listo”</b>.</p>
+        <h3>Aparece la operación (en 3D)</h3>
+        <p>Sale una operación al azar sobre el marcador. En <b>niveles 1 y 2</b> aparece una <b>ayuda visual</b> (cajitas para contar). Luego tocas <b>“Listo”</b>.</p>
       </div>
     </div>
 
-    <!-- 3: Bola/circuito de energía -->
+    <!-- 3: Bola de energía -->
     <div class="panel">
       <div class="screen">
         <span class="num">3</span>
         <div class="marker-hint"></div>
-        <span class="pill-top">📷 cámara AR</span>
+        <span class="pill-top">📷 sobre el marcador</span>
         <div class="stk">
-          <div class="energy"><span class="opmini">7 × 8</span></div>
-          <div style="font-size:11px; color:#9fb0d6;">la operación se junta en una bolita de colores</div>
+          <div class="energy"><span class="opmini">3 + 2</span></div>
+          <div style="font-size:11px; color:#9fb0d6;">la operación se vuelve una bola de energía 🔮</div>
         </div>
       </div>
       <div class="cap">
         <h3>Tocas “Listo” ⚡</h3>
-        <p>La operación se junta en una <b>bolita de muchos colores</b> 🌈, sobre el marcador.</p>
+        <p>La operación se junta en una <b>bola de energía animada</b> (estilo Dragon Ball), sobre el marcador.</p>
       </div>
     </div>
 
-    <!-- 4: Dibujar el resultado -->
+    <!-- 4: 4 esferas, arrastrar la correcta -->
     <div class="panel">
       <div class="screen">
         <span class="num">4</span>
         <div class="marker-hint"></div>
-        <span class="pill-top">📷 cámara AR</span>
+        <span class="pill-top">📷 sobre el marcador</span>
         <div class="stk">
-          <div class="energy"><span class="draw" style="font-size:42px;">56</span></div>
-          <span class="confirm-btn">✓ Asegurar</span>
+          <div class="energy target" style="width:92px;height:92px"><span class="opmini">3 + 2</span></div>
+          <span class="drag-arrow">⬆</span>
+          <div class="opts">
+            <div class="opt-sphere">4</div>
+            <div class="opt-sphere correct">5</div>
+            <div class="opt-sphere">6</div>
+            <div class="opt-sphere">7</div>
+          </div>
         </div>
         <span class="finger">👆</span>
       </div>
       <div class="cap">
-        <h3>Dibujas el resultado</h3>
-        <p>Con el dedo dibujas el número (56) <b>encima de la bolita</b>, y tocas <b>“Asegurar”</b> para revisarlo.</p>
+        <h3>Eliges la respuesta</h3>
+        <p>Aparecen <b>4 esferas con opciones</b>. Arrastras la <b>correcta</b> (5) hasta la bola de energía.</p>
       </div>
     </div>
 
@@ -207,7 +227,7 @@
       </div>
       <div class="cap">
         <h3>Si aciertas ✅</h3>
-        <p>Te dice que el resultado fue correcto y eliges <b>otra operación</b> o <b>salir</b>.</p>
+        <p>Te dice que fue correcto y eliges <b>otra operación</b> o <b>salir</b>.</p>
       </div>
     </div>
 
@@ -216,8 +236,8 @@
       <div class="screen">
         <span class="num">6</span>
         <div class="stk">
-          <div style="font-size:30px;">🤏❌</div>
-          <div class="result-bad">Casi… la respuesta era <b style="color:#fff;">56</b></div>
+          <div style="font-size:30px;">❌</div>
+          <div class="result-bad">Casi… la respuesta era <b style="color:#fff;">5</b></div>
           <div class="choices">
             <span class="choice">🔁 Repetir</span>
           </div>
@@ -225,7 +245,7 @@
       </div>
       <div class="cap">
         <h3>Si te equivocas ❌</h3>
-        <p>Te muestra el <b>resultado correcto</b> y te dice que <b>repitas</b>.</p>
+        <p>Te muestra la <b>respuesta correcta</b> y te dice que <b>repitas</b>.</p>
       </div>
     </div>
 
@@ -235,35 +255,36 @@
   <p class="lead">El mismo recorrido, como diagrama de flujo.</p>
   <pre class="mermaid">
 flowchart TD
-    A["Elegir nivel (1-4)"] --> B["Aparece operación aleatoria<br/>+ icono Listo (sobre el marcador)"]
-    B --> C["Tocar Listo ⚡<br/>→ bolita de colores 🌈"]
-    C --> D["Dibujar el resultado<br/>con el dedo"]
-    D --> D2["Tocar 'Asegurar' ✓"]
-    D2 --> E{"¿Correcto?"}
-    E -->|Sí| F["🎉 ¡Correcto!"]
-    E -->|No| G["Muestra respuesta correcta<br/>→ Repetir"]
-    G --> D
-    F --> H{"¿Qué hago?"}
-    H -->|Otra operación| A
-    H -->|Salir| I["Salir del juego"]
+    A["Elegir nivel (1-4)"] --> B["Aparece operación aleatoria en 3D<br/>(niveles 1-2: ayuda visual) + Listo"]
+    B --> C["Tocar Listo ⚡<br/>→ bola de energía 🔮"]
+    C --> D["Aparecen 4 esferas con opciones"]
+    D --> E["Arrastrar la esfera correcta<br/>a la bola de energía"]
+    E --> F{"¿Correcto?"}
+    F -->|Sí| G["🎉 ¡Correcto!"]
+    F -->|No| H["Muestra respuesta correcta<br/>→ Repetir"]
+    H --> D
+    G --> I{"¿Qué hago?"}
+    I -->|Otra operación| B
+    I -->|Salir| J["Salir del juego"]
 
     classDef ok fill:#e3f6ee,stroke:#15a37a,color:#0c5a44;
     classDef step fill:#fff,stroke:#23b58a,color:#0c5a44;
-    class A,B,C,D,D2 step; class F ok;
+    class A,B,C,D,E step; class G ok;
   </pre>
 
-  <div class="notecard" style="background:#e3f6ee; border-left-color:#15a37a;">
-    <h3 style="color:#0c8a5f;">✅ Aclaraciones de Lucas</h3>
-    <ol>
-      <li><b>No hay abuelita</b> 👵❌ — fue un error del audio: dijo <b>“bolita”</b>. Y no es “circuito” sino <b>“circulito”</b>: dibujas sobre la bolita.</li>
-      <li><b>“Bola de coloritos”</b> 🌈 — una bolita con <b>muchos colores</b>.</li>
-      <li><b>Todo pasa sobre el marcador</b> 📷 — es AR, como el Sistema Solar.</li>
-      <li><b>Hay un botón “Asegurar”</b> ✓ — dibujas el número y lo confirmas con un botón para revisarlo.</li>
-      <li><b>El nivel se elige antes de cada operación</b> 🎚️ — no una sola vez.</li>
-    </ol>
+  <div class="notecard">
+    <h3>✅ Especificaciones (versión 2, con Lucas)</h3>
+    <ul>
+      <li><b>Bola de energía estilo Dragon Ball</b> 🔮: animada y brillante; los colores son secundarios, lo importante es que parezca una bola de energía.</li>
+      <li><b>Responder = arrastrar</b> 🎯: aparecen <b>4 esferas con opciones</b> y el estudiante arrastra la correcta a la bola (en vez de reconocer escritura a mano).</li>
+      <li><b>Ayuda visual en niveles 1 y 2</b> 🧮: cajitas/pistas para resolver visualmente (ej. 3+2 con cubitos).</li>
+      <li><b>Edades</b> 🧒: nivel 1 ≈ 7 años, nivel 4 ≈ 11 años.</li>
+      <li><b>3D sobre el marcador</b> 🧊: números y operaciones aparecen en 3D en realidad aumentada.</li>
+      <li><b>Flujo</b> 🔁: “otra operación” vuelve a mostrar una operación (mismo nivel).</li>
+    </ul>
   </div>
 
-  <p class="foot">Borrador de storyboard · Academia Virtualis · para la hackathon de Lucas 🚀</p>
+  <p class="foot">Storyboard v2 · Academia Virtualis · para la hackathon de Lucas 🚀</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
