@@ -10,3 +10,6 @@ dist/
 # Runtime temp files
 *.log
 .npm-cache/
+
+# Brainstorm visual companion
+.superpowers/
