@@ -68,6 +68,8 @@ los grupos de premios. Así se evita una dependencia `shared → catalogo`.
   - `proximamente` → tarjeta atenuada con 🔒, no navegable.
 - Importa `shared/ui/wallet.js` + `shared/nft/gallery.js` para el botón 🏆 y la galería agrupada.
 - **No** carga A-Frame/MindAR (la portada es ligera). `index.html` no incluye los `<script>` de vendor AR.
+- **Enlace a Canva al final del catálogo:** un pie de página con un enlace al sitio externo
+  (`RETURN_URL` de `app-config`). Sustituye al antiguo botón "Cerrar sitio" del juego solar.
 
 ### 4.2 Juego Sistema Solar (`juegos/sistema-solar/index.html` + `src/juegos/sistema-solar/*`)
 - Se mueve el HTML AR actual (a-scene, HUD, labels, paneles, modales) desde `index.html`.
@@ -76,8 +78,9 @@ los grupos de premios. Así se evita una dependencia `shared → catalogo`.
   - rutas de import hacia `shared/`,
   - rutas de `<script>`/`<link>` en el HTML,
   - extracción de la parte de billetera del overlay (pasa a `shared/ui/wallet.js`).
-- El botón post-NFT **«Cerrar»** pasa a regresar a la **portada** (`/`) en lugar de la web
-  externa (`RETURN_URL`), coherente con un mundo de catálogo. *(Confirmar al implementar; bajo riesgo.)*
+- El botón post-NFT **«Cerrar sitio» se elimina** del juego solar. El modal de premio queda solo
+  con «Descargar NFT» y «Volver a intentar». El enlace a Canva (`RETURN_URL`) se mueve al pie del
+  catálogo (ver 4.1).
 
 ### 4.3 Juego Operaciones (`juegos/operaciones/index.html` + `src/juegos/operaciones/main.js`)
 - Página mínima: fondo, título "Operaciones", cartel **"🚧 Próximamente"**, botón **«‹ Volver»**.
@@ -144,7 +147,7 @@ solo las páginas de juego cargan esos `<script>`.
 
 - Portada `/` → tarjeta → `/juegos/sistema-solar/` o `/juegos/operaciones/`.
 - En cada juego, «‹ Volver» → `/`.
-- Cierre post-NFT del solar → `/` (antes web externa).
+- Enlace a Canva (`RETURN_URL`) → pie del catálogo (ya no hay botón "Cerrar" en el solar).
 
 ## 8. Riesgos y consideraciones
 
