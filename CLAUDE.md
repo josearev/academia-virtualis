@@ -90,8 +90,24 @@ juegos/sistema-solar/index.html (AR shell + «‹ Volver» button + UI mount poi
             └── src/shared/ui/wallet.js                       ← shared 🏆 wallet
 ```
 
-> The new **Operaciones** game (`juegos/operaciones/index.html`) is currently a "🚧 Próximamente"
-> placeholder; its mechanic will be designed in a later session.
+### Data Flow — Operaciones game (`juegos/operaciones/index.html`)
+
+Math game: choose a level (1-4, ages ~7-11), a random operation appears (with a visual cube hint
+on levels 1-2), tap "Listo" → an animated energy ball + 4 answer spheres; drag the correct sphere
+onto the ball. Correct → another op / exit; wrong → shows the answer → repeat.
+
+```
+juegos/operaciones/index.html (A-Frame shell for AR; #op-root overlay built by JS)
+    └── src/juegos/operaciones/main.js     ← orchestrator (game loop, AR start button, nomarker mode)
+            ├── src/juegos/operaciones/mathgen.js  ← PURE logic: operation per level + 4 options  [TESTED]
+            ├── src/juegos/operaciones/ui.js       ← DOM layer: level select, energy ball, draggable spheres
+            └── src/juegos/operaciones/config.js   ← nomarker flag + random backgrounds
+```
+
+- **Test flag:** open `/juegos/operaciones/?nomarker=1` (or `?test`) to play in a plain browser
+  with a random gradient background — no camera/marker needed. AR mode shows a "▶ Iniciar cámara AR"
+  button (iOS Safari requires a user gesture to start the camera).
+- **Tests:** `npm test` runs `node --test` against `mathgen.test.js` (the only automated tests in the repo).
 
 ### Configuration (`src/juegos/sistema-solar/config/app-config.js`)
 

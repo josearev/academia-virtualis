@@ -17,7 +17,7 @@ export const GAMES = [
     emoji: "➗",
     color: "linear-gradient(135deg, #0e7a5f, #23b58a)",
     url: "/juegos/operaciones/",
-    estado: "proximamente"
+    estado: "disponible"
   }
 ];
 
