@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Sistema Solar AR — Academia Virtualis</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/shared/ui/wallet.css" />
+    <script src="/vendor/aframe/aframe.min.js"></script>
+    <script src="/vendor/mindar/mindar-image-aframe.prod.js"></script>
+  </head>
+  <body>
+    <div id="app-shell">
+      <a-scene
+        id="ar-scene"
+        mindar-image="imageTargetSrc: /assets/targets/marker-sistema-solar.mind; autoStart: false; maxTrack: 1; missTolerance: 10; warmupTolerance: 6; filterMinCF: 0.0001; filterBeta: 0.001; uiLoading: no; uiScanning: no;"
+        color-space="sRGB"
+        renderer="colorManagement: true, physicallyCorrectLights"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false"
+        embedded
+      >
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        <a-entity id="target-root" mindar-image-target="targetIndex: 0"></a-entity>
+      </a-scene>
+
+      <a href="/" id="back-to-catalog" class="back-to-catalog" aria-label="Volver al catálogo de juegos">‹ Volver</a>
+
+      <div id="hud" aria-live="polite">
+        <div id="status-pill">Iniciando cámara AR...</div>
+        <div id="progress-pill">Aciertos: 0/9</div>
+      </div>
+
+      <div id="labels-layer" aria-label="Etiquetas de planetas"></div>
+      <div id="stamp-layer" aria-hidden="true"></div>
+      <canvas id="confetti-layer" aria-hidden="true" hidden></canvas>
+      <section id="controls-panel" class="controls-panel" hidden>
+        <div class="controls-section">
+          <h3 class="controls-section-title">Configuración</h3>
+          <label for="zoom-range">Zoom sistema solar</label>
+          <input id="zoom-range" type="range" min="0.1" max="8" step="0.01" value="1.5" />
+          <span id="zoom-value">1.50x</span>
+          <label for="orbit-range">Tamaño de órbitas</label>
+          <input id="orbit-range" type="range" min="2" max="5" step="0.05" value="2.5" />
+          <span id="orbit-value">2.50x</span>
+          <label for="planet-range">Tamaño de planetas</label>
+          <input id="planet-range" type="range" min="0.5" max="3" step="0.05" value="1" />
+          <span id="planet-value">1.00x</span>
+          <label for="speed-range">Velocidad de órbita</label>
+          <input id="speed-range" type="range" min="0" max="3" step="0.05" value="0.7" />
+          <span id="speed-value">0.70x</span>
+        </div>
+        <div id="rotation-section" class="controls-section">
+          <h3 class="controls-section-title">Rotación</h3>
+          <label for="rotation-x-range">Rotación X</label>
+          <input id="rotation-x-range" type="range" min="-180" max="180" step="1" value="-4" />
+          <span id="rotation-x-value" class="rotation-value">-4°</span>
+          <label for="rotation-y-range">Rotación Y</label>
+          <input id="rotation-y-range" type="range" min="-180" max="180" step="1" value="0" />
+          <span id="rotation-y-value" class="rotation-value">0°</span>
+          <label for="rotation-z-range">Rotación Z</label>
+          <input id="rotation-z-range" type="range" min="-180" max="180" step="1" value="0" />
+          <span id="rotation-z-value" class="rotation-value">0°</span>
+        </div>
+        <button id="reset-controls-btn" class="controls-reset-btn" type="button">Reset sliders</button>
+      </section>
+
+      <button
+        id="controls-toggle"
+        class="controls-toggle"
+        type="button"
+        aria-label="Expandir panel de controles"
+        aria-expanded="false"
+        hidden
+      >
+        &#9776;
+      </button>
+
+      <button id="wallet-btn" type="button" aria-label="Abrir galería de NFTs">
+        <svg class="wallet-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M3 7.5A2.5 2.5 0 0 1 5.5 5h12A2.5 2.5 0 0 1 20 7.5V9h1.5A1.5 1.5 0 0 1 23 10.5v5a1.5 1.5 0 0 1-1.5 1.5H20v1.5a2.5 2.5 0 0 1-2.5 2.5h-12A2.5 2.5 0 0 1 3 18.5v-11ZM20 15h1v-4h-1a2 2 0 0 0 0 4Zm-2-8H5.5a.5.5 0 0 0 0 1H18V7Zm0 3H5v8.5a.5.5 0 0 0 .5.5h12a.5.5 0 0 0 .5-.5V17h-1a4 4 0 1 1 0-8h1v-.5A.5.5 0 0 0 18 10Z"
+          />
+        </svg>
+      </button>
+
+      <section id="camera-gate" hidden>
+        <h2>Actividad AR</h2>
+        <p id="camera-gate-text">Iniciando camara AR automaticamente...</p>
+        <button id="start-ar-btn" type="button">Iniciar camara AR</button>
+        <p id="camera-debug" aria-live="polite"></p>
+      </section>
+
+      <div id="version-counter" aria-live="polite"></div>
+
+      <section id="completion-modal" class="overlay-modal overlay-modal--countdown" hidden>
+        <h1>Actividad completada</h1>
+        <p id="completion-message"></p>
+        <p id="completion-countdown">Mostrando NFT en <span id="completion-countdown-value">5</span>s</p>
+      </section>
+
+      <section id="nft-modal" class="overlay-modal overlay-modal--nft" hidden>
+        <h1>NFT asignado</h1>
+        <figure id="nft-figure" hidden>
+          <img id="nft-image" alt="NFT ganado" />
+          <figcaption id="nft-style-name">Estilo desconocido</figcaption>
+        </figure>
+        <div id="action-buttons" hidden>
+          <button id="download-btn" type="button">Descargar NFT</button>
+          <button id="retry-btn" type="button">Volver a intentar</button>
+        </div>
+      </section>
+
+      <section id="gallery-modal" class="overlay-modal overlay-modal--gallery" hidden>
+        <h1>Mi galería NFT</h1>
+        <p id="gallery-empty" hidden>Aún no has ganado NFTs. Completa una actividad para obtener uno.</p>
+        <div id="gallery-grid" hidden></div>
+        <button id="gallery-close-btn" type="button">Cerrar galería</button>
+      </section>
+    </div>
+
+    <script type="module" src="/src/juegos/sistema-solar/main.js"></script>
+  </body>
+</html>
