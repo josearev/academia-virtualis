@@ -184,7 +184,7 @@ export const createScene3D = ({ sceneEl, anchorEl }) => {
         if (raycaster.ray.intersectPlane(plane, planeHit)) {
           active.mesh.position.copy(active.mesh.parent.worldToLocal(planeHit.clone()));
           const d = active.mesh.getWorldPosition(new THREE.Vector3()).distanceTo(ballWorldPos());
-          ball.glow.material.opacity = d < SNAP_DISTANCE ? 0.6 : 0.3;
+          ball.glow.material.opacity = d < SNAP_DISTANCE * group.scale.x ? 0.6 : 0.3;
         }
         e.preventDefault();
       };
@@ -198,7 +198,7 @@ export const createScene3D = ({ sceneEl, anchorEl }) => {
         entry.mesh.scale.setScalar(1);
         ball.glow.material.opacity = 0.3;
         const d = entry.mesh.getWorldPosition(new THREE.Vector3()).distanceTo(ballWorldPos());
-        if (d < SNAP_DISTANCE) {
+        if (d < SNAP_DISTANCE * group.scale.x) {
           answered = true;
           teardown();
           resolve({ value: entry.value, isCorrect: entry.value === operation.answer });
@@ -240,6 +240,12 @@ export const createScene3D = ({ sceneEl, anchorEl }) => {
     }
   };
 
+  // Escala todo el contenido 3D (zoom). El arrastre sigue funcionando porque
+  // el raycasting trabaja en coordenadas de mundo y convierte a local del grupo.
+  const setScale = (factor) => {
+    group.scale.setScalar(factor);
+  };
+
   const dispose = () => {
     if (rafId) {
       cancelAnimationFrame(rafId);
@@ -249,5 +255,5 @@ export const createScene3D = ({ sceneEl, anchorEl }) => {
     anchorEl.object3D.remove(group);
   };
 
-  return { showOperation, playAnswer, clear, dispose };
+  return { showOperation, playAnswer, clear, dispose, setScale };
 };

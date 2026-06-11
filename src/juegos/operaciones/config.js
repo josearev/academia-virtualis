@@ -18,3 +18,22 @@ export const BACKGROUNDS = [
 
 export const pickRandomBackground = () =>
   BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)];
+
+// ── Zoom de los objetos 3D (persistido en cookie, como el Sistema Solar) ──────
+export const ZOOM_RANGE = { min: 0.3, max: 3, step: 0.05, initial: 1 };
+
+const ZOOM_COOKIE_KEY = "av_op_zoom";
+const ZOOM_COOKIE_MAX_AGE = 180 * 24 * 60 * 60;
+
+export const getZoomFromCookie = () => {
+  const match = document.cookie.match(/(?:^|;\s*)av_op_zoom=([^;]+)/);
+  const value = match ? Number(decodeURIComponent(match[1])) : NaN;
+  if (!Number.isFinite(value)) {
+    return ZOOM_RANGE.initial;
+  }
+  return Math.min(ZOOM_RANGE.max, Math.max(ZOOM_RANGE.min, value));
+};
+
+export const saveZoomToCookie = (value) => {
+  document.cookie = `${ZOOM_COOKIE_KEY}=${encodeURIComponent(value)}; path=/; max-age=${ZOOM_COOKIE_MAX_AGE}; SameSite=Lax`;
+};

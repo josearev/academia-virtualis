@@ -135,6 +135,32 @@ export const createOperacionesUI = () => {
     root.appendChild(readyWrap);
   });
 
+  // ── Control de zoom (siempre visible) ────────────────────────────────────────
+  // Escala los objetos 3D, como el control del Sistema Solar. Persiste fuera (cookie).
+  const mountZoom = ({ value, min, max, step, onInput }) => {
+    mount();
+    if (document.getElementById("op-zoom")) {
+      return;
+    }
+    const panel = el("div", "op-zoom", { id: "op-zoom" });
+    const label = el("span", "op-zoom-label", { text: "🔍 Zoom" });
+    const slider = el("input", "op-zoom-range", {
+      type: "range",
+      min: String(min),
+      max: String(max),
+      step: String(step)
+    });
+    slider.value = String(value);
+    const valueText = el("span", "op-zoom-value", { text: `${Number(value).toFixed(2)}x` });
+    slider.addEventListener("input", () => {
+      const n = Number(slider.value);
+      valueText.textContent = `${n.toFixed(2)}x`;
+      onInput(n);
+    });
+    panel.append(label, slider, valueText);
+    root.appendChild(panel);
+  };
+
   // ── Resultado ────────────────────────────────────────────────────────────────
   const showResult = (isCorrect, correctAnswer) => new Promise((resolve) => {
     mount();
@@ -166,5 +192,5 @@ export const createOperacionesUI = () => {
     stage.appendChild(result);
   });
 
-  return { mount, levelSelect, showReady, showResult, clear };
+  return { mount, levelSelect, showReady, showResult, clear, mountZoom };
 };
