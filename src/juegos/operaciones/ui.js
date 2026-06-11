@@ -115,7 +115,6 @@ const attachDrag = (spheres, ball, onDrop) => {
 
     // Feedback snap-target si cerca
     const { cx: bx, cy: by, radius: br } = getBallCenter();
-    const sc = getSphereCenter(active.sphere);
     // Aproximación: usar posición del puntero para cálculo más estable
     const dist = Math.hypot(e.clientX - bx, e.clientY - by);
     if (dist < br + 30) {
@@ -154,15 +153,17 @@ const attachDrag = (spheres, ball, onDrop) => {
       disabled = true;
       sphere.classList.remove("dragging");
       sphere.classList.add("accepted");
+      dragController.abort(); // elimina los 3 window listeners de esta ronda
       onDrop(value);
     } else {
       resetSphere(sphere);
     }
   };
 
-  window.addEventListener("pointermove", onPointerMove, { passive: false });
-  window.addEventListener("pointerup", (e) => finishDrag(e, false), { passive: false });
-  window.addEventListener("pointercancel", (e) => finishDrag(e, true), { passive: false });
+  const dragController = new AbortController();
+  window.addEventListener("pointermove", onPointerMove, { passive: false, signal: dragController.signal });
+  window.addEventListener("pointerup", (e) => finishDrag(e, false), { passive: false, signal: dragController.signal });
+  window.addEventListener("pointercancel", (e) => finishDrag(e, true), { passive: false, signal: dragController.signal });
 
   spheres.forEach((sphere) => {
     const value = Number(sphere.dataset.value);

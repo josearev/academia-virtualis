@@ -12,8 +12,6 @@ export const LEVELS = {
   4: { age: 11, label: "Nivel 4", hint: false, types: ["mul", "div", "square", "cuberoot"] }
 };
 
-const SYMBOLS = { add: "+", sub: "−", mul: "×", div: "÷" };
-
 // Construye una operación concreta para un tipo y nivel. Devuelve { type, a, b, answer, text, hint }.
 const buildOperation = (type, level, rng) => {
   switch (type) {

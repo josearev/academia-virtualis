@@ -97,7 +97,20 @@ if (isNoMarkerMode()) {
   }
   ui.setBackground(pickRandomBackground());
 } else {
-  startAr();
+  // iOS Safari exige un gesto del usuario para encender la cámara: mostramos un botón.
+  const startButton = document.createElement("button");
+  startButton.id = "op-start-ar";
+  startButton.type = "button";
+  startButton.textContent = "▶ Iniciar cámara AR";
+  startButton.addEventListener(
+    "click",
+    () => {
+      startButton.remove();
+      startAr();
+    },
+    { once: true }
+  );
+  document.body.appendChild(startButton);
 }
 
 runGame();

@@ -18,11 +18,3 @@ export const BACKGROUNDS = [
 
 export const pickRandomBackground = () =>
   BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)];
-
-// Texto y tunables.
-export const GAME_CONFIG = {
-  markerSrc: "/assets/targets/marker-sistema-solar.mind",
-  correctText: "¡Resultado correcto!",
-  incorrectPrefix: "Casi… la respuesta era",
-  defaultLevel: 1
-};
