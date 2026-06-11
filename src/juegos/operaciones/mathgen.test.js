@@ -24,7 +24,7 @@ test("generateOperation respeta el nivel y produce respuestas correctas", () => 
       if (op.type === "sub") { assert.equal(op.answer, op.a - op.b); assert.ok(op.answer >= 0); }
       if (op.type === "mul") assert.equal(op.answer, op.a * op.b);
       if (op.type === "div") assert.equal(op.a, op.b * op.answer);
-      if (op.type === "square") assert.equal(op.answer * op.answer, op.a);
+      if (op.type === "square") assert.equal(op.answer, op.a * op.a);
       if (op.type === "cuberoot") assert.equal(op.answer ** 3, op.a);
       assert.equal(typeof op.text, "string");
       assert.ok(op.text.length > 0);

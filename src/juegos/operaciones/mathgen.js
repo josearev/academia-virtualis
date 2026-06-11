@@ -43,9 +43,8 @@ const buildOperation = (type, level, rng) => {
       return { type, a, b, answer, text: `${a} ÷ ${b}`, hint: null };
     }
     case "square": {
-      const answer = randInt(2, 12, rng);
-      const a = answer * answer;
-      return { type, a, b: 2, answer, text: `${answer}²`, hint: null };
+      const a = randInt(2, 12, rng);
+      return { type, a, b: 2, answer: a * a, text: `${a}²`, hint: null };
     }
     case "cuberoot": {
       const root = pick([2, 3, 4, 5, 6, 10], rng);
