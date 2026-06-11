@@ -34,7 +34,9 @@ html, body {
   margin: 8px 0;
 }
 
-.catalog-wallet {
+/* Mayor especificidad que `#wallet-btn` de wallet.css (que se carga después),
+   para anclar el botón 🏆 dentro del encabezado en vez de flotar abajo. */
+.catalog-header #wallet-btn {
   position: static;
   transform: none;
   flex: 0 0 auto;

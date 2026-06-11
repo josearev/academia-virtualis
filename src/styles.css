@@ -439,11 +439,6 @@ button {
   color: #f4f8ff;
 }
 
-#close-btn {
-  background: #2b3448;
-  color: #f4f8ff;
-}
-
 #version-counter {
   position: fixed;
   right: max(10px, env(safe-area-inset-right));
