@@ -159,3 +159,33 @@ por favor realiza estos cambios:
 5. Modifica el color de fonde de la etiqueta cuando está en el planeta correcto a un verte más claro
 7. Cada NFT tiene un estilo diferente, por favor muestra el nombre del estilo del NFT debajo de la imagen, el nombre de la imagen luego del último guión te indica cual es el nombre del estilo, por ejemplo si el archivo se llama `NFT-SistemaSolar-1-LooneyTunes.png` el estilo es Looney Tunes.
 6. Actualiza los posibles NFTs, he agregado más imágenes en el directorio y les he cambiado el nombre para cumplir la regla del punto anterior
+
+---
+
+Claude, esta es una conversación que tuvimos Lucas y yo sobre el nuevo juego de mates, revisa la conversación y genera un mockup del juego tipo story board con lo que comprendes de la conversación. Si algo no tienes claro o te quedan dudas preguntale a Lucas para que te aclare:
+
+hola Lucas de qué se trata el juego de mate 
+venas José el juego de mate se trata de qué hay una operación matemática de ahí te aparecerá un icono que dirá listo cuando tú le hagas clic en icono la suma la multiplicación o la operación que haya elegido se va a juntar en una bola de Coritos tienes que dibujar de ahí el resultado encima de la abuelita sin embargo si es el resultado incorrecto te aparecerá el resultado correcto y te dirá que repitas sin embargo si el resultado es correcto te dice que el resultado ha sido correcto y te dice que elijas alguna otra operación o salir del juego
+
+muy bien vamos a hacer un poquito más específicos cuando la operación aparece inicialmente qué tipo de operación es
+El tipo de operación que aparece al inicio es una operación aleatoria o sea mira se elige una operación aleatoriamente y depende de la operación que salga te saldrá la operación como por ejemplo 2 + 3 o 10 × 6
+
+OK y dónde debe aparecer esa operación matemática
+La matemática tiene que aparecer en la pantalla así se entenderá más que ese es el problema central
+
+Y las operaciones que van a aparecer son muy difíciles o muy fáciles
+Depende puedes elegir el nivel de dificultad para la operación por ejemplo digamos no sabes muchas matemáticas pones nivel uno y te sale digamos una multiplicación 4 × 4 o digamos que pones nivel cuatro te sale digamos la raíz cúbica de 25
+
+cómo va el estudiante cómo vas decir cuál es la respuesta correcta
+el estudiante tendrá que dibujar el número encima del circuito de energía que se genera al ponerle en listo y depende del resultado te sale que tienes que repetir o salir o elegir otra operación
+
+para niños de qué edades está pensado este tipo de juego
+está pensado de qué este juego podría ser usado desde segundo año para que los niños tengan cada vez más motivación y seguridad con los maestros
+
+
+
+
+
+
+
+
