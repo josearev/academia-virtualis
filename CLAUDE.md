@@ -1,183 +1,195 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Este archivo guía a Claude Code (claude.ai/code) al trabajar con el código de este repositorio.
 
-## Commands
+> Contexto del proyecto: juego educativo de AR desarrollado por José junto a su hijo **Lucas (11 años)** para una hackathon escolar. Mantén las explicaciones didácticas y sencillas; a veces Lucas escribe los prompts directamente.
+
+## Comandos
 
 ```bash
-npm install                  # Install dependencies (Node 20.x — see .nvmrc / engines)
-npm run vendor:sync          # Copy AR libs from node_modules → public/vendor/
-npm run assets:sync          # Copy assets/{targets,nfts} → public/assets/ (skips .DS_Store)
-npm run dev                  # Local dev (runs vendor:sync + assets:sync first)
-npm run dev:host             # LAN dev server at 0.0.0.0:5173 (for iPhone/iPad testing)
-npm run dev:remote           # Vite + Basic Auth proxy + Cloudflare HTTPS tunnel
-npm run tunnel               # Alias for dev:remote (credentials: virtualis / virtualis.1811)
-npm run compile:target       # Recompile the .mind marker file
-npm run build                # Production build → dist/ (runs vendor:sync + assets:sync first)
-npm run preview              # Serve built app on 0.0.0.0:4173
+npm install                  # Instala dependencias (Node 20.x — ver .nvmrc / engines)
+npm run vendor:sync          # Copia libs de AR de node_modules → public/vendor/
+npm run assets:sync          # Copia assets/{targets,nfts} → public/assets/ (omite .DS_Store)
+npm run dev                  # Dev local (corre vendor:sync + assets:sync primero)
+npm run dev:host             # Servidor dev en LAN 0.0.0.0:5173 (para probar en iPhone/iPad)
+npm run dev:remote           # Vite + proxy Basic Auth + túnel HTTPS de Cloudflare
+npm run tunnel               # Alias de dev:remote (credenciales: virtualis / virtualis.1811)
+npm run compile:target       # Recompila el archivo de marcador .mind
+npm run build                # Build de producción → dist/ (corre vendor:sync + assets:sync primero)
+npm run preview              # Sirve la app construida en 0.0.0.0:4173
+npm test                     # Tests automáticos: node --test (solo mathgen.test.js por ahora)
 ```
 
-> **Workflow**: `npm install && npm run compile:target && npm run dev:host`
+> **Flujo de trabajo**: `npm install && npm run compile:target && npm run dev:host`
 
-`dev`, `dev:host`, `dev:remote`, `tunnel`, and `build` all run `vendor:sync` **and** `assets:sync` before starting — these two sync steps populate `public/`, which is otherwise empty of runtime files. Skip them and the page 404s on `/vendor/*` (AR libraries) or `/assets/*` (markers and NFTs).
+`dev`, `dev:host`, `dev:remote`, `tunnel` y `build` corren `vendor:sync` **y** `assets:sync` antes de arrancar — esos dos pasos llenan `public/`, que de otro modo no tiene los archivos de runtime. Si los saltas, la página da 404 en `/vendor/*` (librerías AR) o `/assets/*` (marcadores y NFTs).
 
-**Tunnel ports & credentials**: `npm run tunnel` (= `dev:remote`) starts Vite on 5173 plus a Basic Auth proxy on 5174, then opens a `cloudflared` HTTPS tunnel pointing at the proxy. Do NOT run `dev:host` and `tunnel` at the same time — kill all Vite processes first (`lsof -ti :5173 | xargs kill -9; lsof -ti :5174 | xargs kill -9`). Requires the `cloudflared` CLI in `PATH`. Configurable via env vars: `TUNNEL_USER`, `TUNNEL_PASSWORD`, `HOST`, `PORT` (Vite, default 5173), `PROXY_PORT` (auth proxy, default 5174).
+**Puertos y credenciales del túnel**: `npm run tunnel` (= `dev:remote`) levanta Vite en 5173 más un proxy Basic Auth en 5174, y luego abre un túnel HTTPS con `cloudflared` apuntando al proxy. NO corras `dev:host` y `tunnel` a la vez — mata primero todos los procesos de Vite (`lsof -ti :5173 | xargs kill -9; lsof -ti :5174 | xargs kill -9`). Requiere el CLI `cloudflared` en el `PATH`. Configurable con variables de entorno: `TUNNEL_USER`, `TUNNEL_PASSWORD`, `HOST`, `PORT` (Vite, por defecto 5173), `PROXY_PORT` (proxy de auth, por defecto 5174).
 
-`compile:target` defaults to `assets/markers/marker-sistema-solar.png` and writes `assets/targets/<marker-name>.mind`. Override the source with `MARKER_SOURCE=assets/markers/other.png npm run compile:target`.
+`compile:target` usa por defecto `assets/markers/marker-sistema-solar.png` y escribe `assets/targets/<nombre-marcador>.mind`. Cambia el origen con `MARKER_SOURCE=assets/markers/otro.png npm run compile:target`.
 
-There is no test framework. Manual checks: desktop drag/drop, then iOS Safari (camera permission, marker detection, touch drag/drop, 9/9 completion, confetti, NFT reveal + download, gallery, retry/close). After an iPad orientation change, confirm the AR viewport stays aligned (no lateral margin).
+### Pruebas
 
-## Coding Style
+- **Automáticas**: `npm test` corre `node --test` contra `src/juegos/operaciones/mathgen.test.js` (la lógica matemática pura). Son los únicos tests automatizados del repo.
+- **Manuales**: en escritorio probar arrastrar/soltar; luego en iOS Safari (permiso de cámara, detección del marcador, arrastre táctil, completar, confeti, NFT + descarga, galería, reintentar/volver). Tras un cambio de orientación en iPad, confirmar que el viewport AR queda alineado (sin margen lateral).
+- El juego de Operaciones tiene un **modo sin AR** para probar en el navegador: `/juegos/operaciones/?nomarker=1`.
 
-- ES modules (`type: module`), plain JavaScript + CSS, no framework, no `vite.config.*` (Vite defaults).
-- Indentation: 2 spaces; always use semicolons.
-- `camelCase` for variables/functions, `UPPER_SNAKE_CASE` for constants, lowercase file names grouped by domain.
-- Keep modules focused. Per game, code lives under `src/juegos/<id>/` (for Sistema Solar: AR logic in `ar/`, gameplay in `game/`, UI in `ui/`, tunables in `config/`). Cross-game code lives in `src/shared/`.
-- **Tunables go in `src/juegos/sistema-solar/config/app-config.js`, not inline.** Strings, distances, ranges, timings, colors, and feature flags are all centralized there (see Configuration below).
+## Estilo de código
 
-## Commit & Pull Request Guidelines
+- Módulos ES (`type: module`), JavaScript plano + CSS, sin framework.
+- Indentación: 2 espacios; siempre punto y coma.
+- `camelCase` para variables/funciones, `UPPER_SNAKE_CASE` para constantes, nombres de archivo en minúscula agrupados por dominio.
+- Mantén los módulos enfocados. Por juego, el código vive bajo `src/juegos/<id>/` (Sistema Solar: lógica AR en `ar/`, gameplay en `game/`, UI en `ui/`, ajustes en `config/`). El código compartido entre juegos vive en `src/shared/`.
+- **Los ajustes (tunables) van en el `config` del juego, no inline.** Textos, distancias, rangos, tiempos, colores y feature flags se centralizan ahí (ver Configuración más abajo).
 
-**Every session that changes app code or assets must create a commit** using the format:
-- `[Modelo]: Descripción` (imperative) — e.g. `[Sonnet-4.6]: Implementa validación de drag and drop`
+## Convenciones de commits y documentación
 
-Do not include `prompts.md` changes in feature commits. `prompts.md` is user-owned and must not be edited by agents; use `directivas.md` for agent-maintained session directives. `AGENTS.md` is a stub that just points back to this file.
+**Cada sesión que cambie código o assets debe crear un commit** con el formato:
+- `[Modelo]: Descripción` (en imperativo) — p. ej. `[Opus-4.8]: Implementa validación de drag and drop`.
 
-PRs for UI/AR changes should include screenshots or video, commands run (`build`, marker compile, manual checks), and notes about iOS behavior.
+No incluyas cambios de `prompts.md` en los commits de features. `prompts.md` es del usuario y los agentes no deben editarlo ni leerlo. `AGENTS.md` es un stub que apunta a este archivo.
 
-## Architecture Overview
+**Cierre de ramas**: al finalizar una rama de trabajo, hacer **merge a `main`** (no Pull Request) y mantener `origin/main` actualizado con push. (Flujo rápido de hackathon.)
 
-iOS-first AR educational game with no backend. Everything runs in the browser using A-Frame + MindAR for image-based marker tracking. Students drag shuffled planet name labels onto the matching planet; completing all 9 (Mercurio → Plutón) triggers a confetti + countdown + random NFT reward flow.
+**Documentación** (`docs/`): generar la documentación en **HTML** con un design system ligero y diagramas **Mermaid** cuando aplique (es más didáctico para Lucas). Organizar por tema en subcarpetas (`docs/catalogo/`, `docs/operaciones/`, `docs/arquitectura/`). Avisar a José cuando un documento HTML esté listo para que Lucas lo vea. (Excepción: si José pide explícitamente un `.md`, respétalo.)
 
-### Multi-page architecture (catálogo de juegos)
+## Visión general de la arquitectura
 
-The app is a **multi-page (MPA)** game catalog built with Vite. `index.html` is the catalog
-landing page (no AR); each game is its own HTML page under `juegos/<id>/index.html` with its
-JS under `src/juegos/<id>/`. Navigating between pages does a full reload, so the camera/MindAR
-lifecycle resets cleanly (important on iOS Safari). **All games share the same AR marker** (`.mind`).
+Juego educativo de AR **iPhone-first**, sin backend. Todo corre en el navegador con A-Frame + MindAR para seguimiento de marcador por imagen. El marcador `.mind` es **compartido por todos los juegos**.
 
-- `vite.config.js` declares the 3 entry points (`rollupOptions.input`): catalog + 2 games.
-- Shared code lives in `src/shared/`:
-  - `games.js` — single source of truth for the game list (`GAMES`) + `CANVA_URL` footer link.
-  - `nft/gallery.js` — NFT award + cookie persistence, **grouped by game** (cookie `av_nft_gallery_v3`,
-    `{ games: { [gameId]: { counts, order } }, lastWonAt }`; auto-migrates from flat `v2` and legacy
-    localStorage, assigning old prizes to `sistema-solar`). `awardRandomNft(gameId)`,
-    `getGallerySummary()` → `[{ gameId, nombre, items }]`.
-  - `ui/wallet.js` (+ `wallet.css`) — the 🏆 button + gallery modal, rendering prizes grouped by game.
-    Used by both the catalog and the games. Self-contained styles (does not depend on `styles.css`).
+### Arquitectura multipágina (catálogo de juegos)
 
-### Data Flow — Catalog (`index.html`)
+La app es un **catálogo multipágina (MPA)** construido con Vite. `index.html` es la portada del catálogo (sin AR); cada juego es su propia página HTML bajo `juegos/<id>/index.html` con su JS bajo `src/juegos/<id>/`. Navegar entre páginas hace una recarga completa, así el ciclo de vida de cámara/MindAR se reinicia limpio (importante en iOS Safari).
+
+- `vite.config.js` declara los 3 puntos de entrada (`rollupOptions.input`): catálogo + 2 juegos.
+- El código compartido vive en `src/shared/`:
+  - `games.js` — fuente única de la lista de juegos (`GAMES`) + enlace `CANVA_URL` del pie.
+  - `nft/gallery.js` — premios NFT + persistencia en cookie, **agrupados por juego** (cookie `av_nft_gallery_v3`, `{ games: { [gameId]: { counts, order } }, lastWonAt }`; auto-migra desde el `v2` plano y el localStorage legacy, asignando los premios viejos a `sistema-solar`). `awardRandomNft(gameId)`, `getGallerySummary()` → `[{ gameId, nombre, items }]`.
+  - `ui/wallet.js` (+ `wallet.css`) — el botón 🏆 + modal de galería, mostrando premios agrupados por juego. Lo usan tanto el catálogo como los juegos. Estilos auto-contenidos (no dependen de `styles.css`).
+
+### Flujo de datos — Catálogo (`index.html`)
 
 ```
-index.html (no AR)
-    └── src/catalogo/catalogo.js  ← renders the game list from GAMES, wires Canva link + wallet
+index.html (sin AR)
+    └── src/catalogo/catalogo.js  ← pinta la lista de juegos desde GAMES, conecta enlace Canva + wallet
             ├── src/shared/games.js       ← GAMES + CANVA_URL
-            └── src/shared/ui/wallet.js   ← 🏆 wallet button + gallery modal
+            └── src/shared/ui/wallet.js   ← botón 🏆 + modal de galería
                     └── src/shared/nft/gallery.js
 ```
 
-### Data Flow — Sistema Solar game (`juegos/sistema-solar/index.html`)
+### Flujo de datos — Juego Sistema Solar (`juegos/sistema-solar/index.html`)
+
+Estudiantes arrastran etiquetas de nombres de planetas (barajadas) sobre el planeta correcto; completar los 9 (Mercurio → Plutón) dispara confeti + cuenta regresiva + premio NFT al azar.
 
 ```
-juegos/sistema-solar/index.html (AR shell + «‹ Volver» button + UI mount points)
-    └── src/juegos/sistema-solar/main.js       ← Orchestrator: boots AR, render loop, pinch/zoom,
-            │                                     slider wiring, drag wiring, completion + confetti
-            ├── src/juegos/sistema-solar/config/app-config.js ← Central config (tunables, ranges, flags)
-            ├── src/juegos/sistema-solar/ar/scene.js          ← Three.js solar system
-            ├── src/juegos/sistema-solar/game/state.js        ← Planet data + derangement shuffle
-            ├── src/juegos/sistema-solar/game/dragdrop.js     ← Pointer event controller
-            ├── src/juegos/sistema-solar/ui/overlay.js        ← DOM: labels, stamps, HUD, completion/NFT modals
+juegos/sistema-solar/index.html (shell AR + botón «‹ Volver» + puntos de montaje de UI)
+    └── src/juegos/sistema-solar/main.js       ← Orquestador: arranca AR, render loop, pinch/zoom,
+            │                                     sliders, drag, completado + confeti
+            ├── src/juegos/sistema-solar/config/app-config.js ← Config central (tunables, rangos, flags)
+            ├── src/juegos/sistema-solar/ar/scene.js          ← Sistema solar en Three.js
+            ├── src/juegos/sistema-solar/game/state.js        ← Datos de planetas + derangement shuffle
+            ├── src/juegos/sistema-solar/game/dragdrop.js     ← Controlador de pointer events
+            ├── src/juegos/sistema-solar/ui/overlay.js        ← DOM: etiquetas, sellos, HUD, modales completado/NFT
             ├── src/shared/nft/gallery.js                     ← awardRandomNft("sistema-solar")
-            └── src/shared/ui/wallet.js                       ← shared 🏆 wallet
+            └── src/shared/ui/wallet.js                       ← wallet 🏆 compartida
 ```
 
-### Data Flow — Operaciones game (`juegos/operaciones/index.html`)
+### Flujo de datos — Juego Operaciones (`juegos/operaciones/index.html`)
 
-Math game: choose a level (1-4, ages ~7-11), a random operation appears (with a visual cube hint
-on levels 1-2), tap "Listo" → an animated energy ball + 4 answer spheres; drag the correct sphere
-onto the ball. Correct → another op / exit; wrong → shows the answer → repeat.
+Juego de matemáticas: eliges un nivel (1-4, edades ~7-11), aparece una operación aleatoria (con ayuda visual de cubitos en niveles 1-2), tocas "Listo" → una bola de energía animada + 4 esferas de respuesta; arrastras la esfera correcta sobre la bola. Correcto → otra operación / salir; incorrecto → muestra la respuesta → repetir.
+
+**El gameplay usa objetos 3D REALES** (Three.js bajo A-Frame) anclados al marcador, así mantienen la perspectiva en AR. Los menús (elegir nivel, botón "Listo" + ayuda, resultado, zoom) son HUD en DOM.
 
 ```
-juegos/operaciones/index.html (A-Frame shell for AR; #op-root overlay built by JS)
-    └── src/juegos/operaciones/main.js     ← orchestrator (game loop, AR start button, nomarker mode)
-            ├── src/juegos/operaciones/mathgen.js  ← PURE logic: operation per level + 4 options  [TESTED]
-            ├── src/juegos/operaciones/ui.js       ← DOM layer: level select, energy ball, draggable spheres
-            └── src/juegos/operaciones/config.js   ← nomarker flag + random backgrounds
+juegos/operaciones/index.html (carga A-Frame + MindAR; main.js construye la escena según el modo)
+    └── src/juegos/operaciones/main.js     ← orquestador (construye escena AR o nomarker, bucle del
+            │                                 juego, botón "Iniciar cámara AR", zoom)
+            ├── src/juegos/operaciones/mathgen.js  ← lógica PURA: operación por nivel + 4 opciones  [CON TESTS]
+            ├── src/juegos/operaciones/scene3d.js  ← contenido 3D real (Three.js): operación (sprite),
+            │                                         bola de energía (esfera emisiva + halo, pulso),
+            │                                         4 esferas; arrastre por RAYCASTING; setScale (zoom)
+            ├── src/juegos/operaciones/ui.js       ← HUD DOM: selección de nivel, "Listo"+ayuda, resultado, slider de zoom
+            └── src/juegos/operaciones/config.js   ← flag nomarker + fondos aleatorios + zoom (cookie av_op_zoom)
 ```
 
-- **Test flag:** open `/juegos/operaciones/?nomarker=1` (or `?test`) to play in a plain browser
-  with a random gradient background — no camera/marker needed. AR mode shows a "▶ Iniciar cámara AR"
-  button (iOS Safari requires a user gesture to start the camera).
-- **Tests:** `npm test` runs `node --test` against `mathgen.test.js` (the only automated tests in the repo).
+- **Anclaje 3D**: en modo AR, el contenido cuelga de `#op-target` (marcador MindAR); en `?nomarker` cuelga de un ancla fija frente a la cámara (`#op-anchor`) con fondo degradado. El arrastre usa raycasting sobre el lienzo, así funciona igual con o sin zoom (el umbral de "soltar en la bola" escala con `group.scale`).
+- **Zoom**: slider abajo-derecha que llama `scene3d.setScale(n)` (escala el grupo 3D), persistido en la cookie `av_op_zoom` (rango `ZOOM_RANGE` en `config.js`, 0.3–3, inicial 1).
+- **Flag de prueba**: abre `/juegos/operaciones/?nomarker=1` (o `?test`) para jugar en el navegador con un fondo degradado aleatorio — sin cámara/marcador. En modo AR aparece un botón "▶ Iniciar cámara AR" (iOS Safari exige un gesto del usuario para encender la cámara).
+- **Niveles** (`LEVELS` en `mathgen.js`): N1 (~7 años) suma/resta; N2 (~8) +multiplicación; N3 (~10) mult/división exacta; N4 (~11) +cuadrados/raíces. Ayuda visual (cubitos) solo en N1 y N2.
 
-### Configuration (`src/juegos/sistema-solar/config/app-config.js`)
+### Configuración (`src/juegos/sistema-solar/config/app-config.js`)
 
-This is the single source of truth for behavior. Read it before changing any constant.
-- `APP_VERSION` — shown on screen via `#version-counter`; bump the sub-version by +1 per commit.
-- `APP_CONFIG` — `successText`, `returnUrl` (**now unused**: the old close button was removed; the Canva link lives in `src/shared/games.js` as `CANVA_URL`, shown at the catalog footer), `snapDistance` (**100 px**, the drop tolerance), `completionCountdownSeconds`, MindAR poll/timeout values, `iosResizeDelaysMs`, gate texts.
-- `UI_PREFERENCES` — `labelOffsetByPlanetId` (per-planet vertical label offset), confetti colors/density.
-- `UI_FLAGS.showRotationControls` — toggles the rotation slider section.
-- `SCENE_CONFIG` — scene scale constants plus slider ranges: `zoom {min,max,initial}` (**0.1 / 8.0 / 1.5**), `orbit`, `planet`, `speed`, and `corePlanets` / `coreTargetWidth` for auto-fit.
-- `ROTATION_CONFIG` — X/Y/Z degree ranges and defaults (X initial `-4`).
-- `SLIDER_COOKIE_CONFIG` + `getSliderPreferenceFromCookies` / `saveSliderPreferenceToCookies` — all slider state and the controls-panel collapsed flag persist in cookies (180-day max-age).
+Fuente única de verdad del comportamiento del Sistema Solar. Léelo antes de cambiar cualquier constante.
+- `APP_VERSION` — se muestra en pantalla vía `#version-counter`; sube la sub-versión en +1 por commit.
+- `APP_CONFIG` — `successText`, `returnUrl` (**ahora sin uso**: se quitó el botón de cerrar; el enlace a Canva vive en `src/shared/games.js` como `CANVA_URL`, mostrado en el pie del catálogo), `snapDistance` (**100 px**, tolerancia de soltado), `completionCountdownSeconds`, valores de poll/timeout de MindAR, `iosResizeDelaysMs`, textos de gate.
+- `UI_PREFERENCES` — `labelOffsetByPlanetId` (offset vertical por planeta), colores/densidad del confeti.
+- `UI_FLAGS.showRotationControls` — activa/desactiva la sección del slider de rotación.
+- `SCENE_CONFIG` — constantes de escala más rangos de sliders: `zoom {min,max,initial}` (**0.1 / 8.0 / 1.5**), `orbit`, `planet`, `speed`, y `corePlanets` / `coreTargetWidth` para auto-ajuste.
+- `ROTATION_CONFIG` — rangos y defaults de grados X/Y/Z (X inicial `-4`).
+- `SLIDER_COOKIE_CONFIG` + `getSliderPreferenceFromCookies` / `saveSliderPreferenceToCookies` — todo el estado de sliders y el flag de panel colapsado persisten en cookies (max-age 180 días).
 
-### AR Lifecycle (`main.js`)
+### Ciclo de vida AR — Sistema Solar (`main.js`)
 
-MindAR is configured with `autoStart: false`. The app **auto-starts the camera ~120 ms after load** (when in a secure/localhost context with a camera API); the `#camera-gate` button is a manual fallback shown on error or insecure context. Startup sequence:
+MindAR se configura con `autoStart: false`. La app **arranca la cámara ~120 ms tras cargar** (en contexto seguro/localhost con API de cámara); el botón `#camera-gate` es un fallback manual mostrado ante error o contexto inseguro. Secuencia de arranque:
 
-1. `startAr()` → `waitForMindarSystem()` waits for the A-Frame scene to load, then polls `sceneEl.systems["mindar-image-system"]` until ready (12 s timeout)
-2. `arSystem.start()` → MindAR emits `arReady` (or `arError`)
-3. `renderstart` event → captures `sceneEl.camera`, starts the `requestAnimationFrame` loop
-4. `targetFound` / `targetLost` on `#target-root` → toggles `gameState.markerVisible`, shows/hides the controls panel
+1. `startAr()` → `waitForMindarSystem()` espera a que cargue la escena A-Frame, luego sondea `sceneEl.systems["mindar-image-system"]` hasta estar listo (timeout 12 s)
+2. `arSystem.start()` → MindAR emite `arReady` (o `arError`)
+3. evento `renderstart` → captura `sceneEl.camera`, arranca el loop de `requestAnimationFrame`
+4. `targetFound` / `targetLost` en `#target-root` → alterna `gameState.markerVisible`, muestra/oculta el panel de controles
 
-The active marker target is `/assets/targets/marker-sistema-solar.mind` (set in `juegos/sistema-solar/index.html`). The same marker is shared by all games.
+El marcador activo es `/assets/targets/marker-sistema-solar.mind` (definido en `juegos/sistema-solar/index.html`). El mismo marcador lo comparten todos los juegos.
 
-### Labels (HTML, not 3D)
+### Etiquetas (HTML, no 3D) — Sistema Solar
 
-Planet labels are `<button>` elements in `#labels-layer`. Every frame, `renderLabels()` projects each planet's 3D world position to 2D via `scene.getScreenPositions(camera, w, h)`, then repositions the DOM buttons. Vertical offset comes from `UI_PREFERENCES.labelOffsetByPlanetId` and scales with `Math.sqrt(scene.getScale())`. When multiple labels land on the same planet, `renderLabels()` stacks them vertically (locked ones first).
+Las etiquetas de planetas son `<button>` en `#labels-layer`. Cada frame, `renderLabels()` proyecta la posición 3D de cada planeta a 2D vía `scene.getScreenPositions(camera, w, h)` y reposiciona los botones DOM. El offset vertical viene de `UI_PREFERENCES.labelOffsetByPlanetId` y escala con `Math.sqrt(scene.getScale())`. Si varias etiquetas caen sobre el mismo planeta, `renderLabels()` las apila verticalmente (primero las bloqueadas).
 
-### Drag-Drop → Snap
+### Drag-Drop → Snap — Sistema Solar
 
-`dragdrop.js` uses pointer capture to unify mouse and touch. On drag-end, `findNearestPlanet()` checks whether the drop point is within `SNAP_DISTANCE` (`APP_CONFIG.snapDistance`, 100 px) of any visible planet's current screen position. Correct planet → increment `gameState.correctCount` + show stamp; if another label was occupying that planet it gets displaced. Wrong/too-far → `overlay.showIncorrect()` (red flash). Drag is disabled during an active pinch gesture and permanently after completion (`dragLockedByCompletion`). Orbits pause while a label is being dragged.
+`dragdrop.js` usa pointer capture para unificar mouse y touch. Al soltar, `findNearestPlanet()` revisa si el punto de soltado está dentro de `SNAP_DISTANCE` (`APP_CONFIG.snapDistance`, 100 px) de la posición en pantalla de algún planeta visible. Planeta correcto → incrementa `gameState.correctCount` + muestra sello; si otra etiqueta ocupaba ese planeta, se desplaza. Incorrecto/lejos → `overlay.showIncorrect()` (destello rojo). El arrastre se desactiva durante un pinch activo y permanentemente tras completar (`dragLockedByCompletion`). Las órbitas se pausan mientras se arrastra una etiqueta.
 
-### Solar System Scene (`src/juegos/sistema-solar/ar/scene.js`)
+### Escena del Sistema Solar (`src/juegos/sistema-solar/ar/scene.js`)
 
-- Three.js root `Group` added to `targetEl.object3D` — tracks the AR marker automatically.
-- Planet meshes use **procedurally drawn canvas textures** (per-planet `createPlanetTexture`); Saturn and Uranus get torus rings. Orbit rings are drawn as flat `RingGeometry`.
-- Exposes independent controls, each with a `get*Range()` returning `{min,max,initial}` from `SCENE_CONFIG`: `setScale` (zoom, scales the root group), `setOrbitScale` (orbit radii + ring group), `setPlanetScale` (per-planet mesh scale), `setOrbitSpeed` (animation speed multiplier), and `setRotationDegrees` (global X/Y/Z tilt). `main.js` wires each to a slider and persists it to a cookie.
-- `fitCorePlanetsToMarker()` can auto-scale so the Sun + core planets fill the marker; `PLANETS` and `phaseOffset` (stored per node) stagger starting angles.
-- `planetNodes` is a `Map<planetId, node>`. `Map.forEach(callback)` is `(value, key, map)` — the second arg is the string key, not a numeric index. Store any numeric index as a node property.
+- `Group` raíz de Three.js añadido a `targetEl.object3D` — sigue el marcador AR automáticamente.
+- Las mallas de planetas usan **texturas dibujadas por canvas** (`createPlanetTexture` por planeta); Saturno y Urano tienen anillos de toro. Los anillos de órbita son `RingGeometry` planos.
+- Expone controles independientes, cada uno con un `get*Range()` que devuelve `{min,max,initial}` de `SCENE_CONFIG`: `setScale` (zoom, escala el grupo raíz), `setOrbitScale` (radios de órbita + grupo de anillos), `setPlanetScale` (escala de malla por planeta), `setOrbitSpeed` (multiplicador de velocidad) y `setRotationDegrees` (inclinación global X/Y/Z). `main.js` conecta cada uno a un slider y lo persiste en cookie.
+- `fitCorePlanetsToMarker()` puede auto-escalar para que el Sol + planetas centrales llenen el marcador; `PLANETS` y `phaseOffset` (guardado por nodo) escalonan los ángulos iniciales.
+- `planetNodes` es un `Map<planetId, node>`. `Map.forEach(callback)` es `(value, key, map)` — el segundo arg es la clave string, no un índice numérico. Guarda cualquier índice numérico como propiedad del nodo.
 
-### iOS Viewport Fixes
+### Arreglos de viewport en iOS — Sistema Solar
 
-`scheduleIosResizes()` calls `requestArResize()` at the `APP_CONFIG.iosResizeDelaysMs` delays (`[0, 120, 320, 650]`) plus an extra 1000 ms and two rAFs. Triggered on `arReady`, `targetFound`, `window resize`, `orientationchange`, and `visualViewport` resize/scroll. `syncArViewport()` forces `position: fixed` (using `visualViewport` metrics) on the A-Frame scene, canvas, and MindAR video element to counteract Safari viewport behavior.
+`scheduleIosResizes()` llama `requestArResize()` en los delays de `APP_CONFIG.iosResizeDelaysMs` (`[0, 120, 320, 650]`) más 1000 ms extra y dos rAFs. Se dispara en `arReady`, `targetFound`, `resize`, `orientationchange` y resize/scroll de `visualViewport`. `syncArViewport()` fuerza `position: fixed` (usando métricas de `visualViewport`) sobre la escena A-Frame, el canvas y el video de MindAR, para contrarrestar el comportamiento del viewport de Safari.
 
-### Zoom & Pinch
+### Zoom y Pinch — Sistema Solar
 
-Two-finger pinch and the zoom slider both call `scene.setScale(n)`, clamped to `SCENE_CONFIG.zoom` (`[0.1, 8.0]`). Scale applies to the Three.js root `Group` (`root.scale.setScalar(baseSystemScale * currentScale)`), not A-Frame entities. Pinch disables drag while active and saves the final zoom to a cookie on release.
+El pinch de dos dedos y el slider de zoom llaman `scene.setScale(n)`, acotado a `SCENE_CONFIG.zoom` (`[0.1, 8.0]`). La escala se aplica al `Group` raíz de Three.js (`root.scale.setScalar(baseSystemScale * currentScale)`), no a entidades A-Frame. El pinch desactiva el arrastre mientras está activo y guarda el zoom final en cookie al soltar.
 
-### Vendor Libraries
+### Librerías vendored
 
-A-Frame and MindAR are NOT loaded from CDN. `scripts/sync-vendor.mjs` copies them from `node_modules` to `public/vendor/` before every dev/build; the **game pages** (`juegos/<id>/index.html`) load them from `/vendor/`. The catalog `index.html` does not load the AR libraries.
+A-Frame y MindAR NO se cargan desde CDN. `scripts/sync-vendor.mjs` las copia de `node_modules` a `public/vendor/` antes de cada dev/build; las **páginas de juego** (`juegos/<id>/index.html`) las cargan desde `/vendor/`. El catálogo `index.html` no carga las librerías AR.
 
-### Runtime Assets
+### Assets de runtime
 
-`scripts/sync-runtime-assets.mjs` (`assets:sync`) copies `assets/targets/` and `assets/nfts/` into `public/assets/` (excluding `.DS_Store`) so Vite serves them at `/assets/...`. Source of truth is `assets/`; `public/assets/` is generated. Marker images live in `assets/markers/`.
+`scripts/sync-runtime-assets.mjs` (`assets:sync`) copia `assets/targets/` y `assets/nfts/` a `public/assets/` (excluyendo `.DS_Store`) para que Vite los sirva en `/assets/...`. La fuente de verdad es `assets/`; `public/assets/` es generado. Las imágenes de marcador viven en `assets/markers/`.
 
-### Marker Compilation
+### Compilación del marcador
 
-`assets/markers/marker-sistema-solar.png` → `npm run compile:target` → `assets/targets/marker-sistema-solar.mind` (then `assets:sync` mirrors it into `public/`). Recompile whenever the marker image changes. `scripts/generate-tech-marker.mjs` can regenerate a high-contrast technical marker PNG programmatically.
+`assets/markers/marker-sistema-solar.png` → `npm run compile:target` → `assets/targets/marker-sistema-solar.mind` (luego `assets:sync` lo espeja en `public/`). Recompila cuando cambie la imagen del marcador. `scripts/generate-tech-marker.mjs` puede regenerar un PNG de marcador técnico de alto contraste programáticamente.
 
-### NFT Reward & Gallery (`src/shared/nft/gallery.js` + `src/shared/ui/wallet.js`)
+### Premios NFT y galería (`src/shared/nft/gallery.js` + `src/shared/ui/wallet.js`)
 
-- The NFT pool is built dynamically at build time via `import.meta.glob("../../../assets/nfts/*.{png,jpg,jpeg,webp,avif}")` — drop a file in `assets/nfts/` and it's included automatically (no hardcoded list).
-- On completion, after the countdown, the game calls `awardRandomNft(gameId)` (e.g. `awardRandomNft("sistema-solar")`) to pick one at random and record it under that game.
-- **Persistence is a cookie**, key `av_nft_gallery_v3` (180-day max-age), storing `{ games: { [gameId]: { counts, order } }, lastWonAt }`. On first read it auto-migrates from the flat `v2` cookie and from legacy `localStorage` (`academia_virtualis_gallery_v1`), assigning those older prizes to `sistema-solar`.
-- `getGallerySummary()` returns prizes grouped by game: `[{ gameId, nombre, items: [{ imageSrc, styleName, count }] }]`, omitting games with no prizes.
-- Style names are derived from the filename segment after the **last hyphen** before the extension: `NFT-SistemaSolar-1-LooneyTunes.png` → `Looney Tunes` (`getNftStyleName`).
-- The 🏆 wallet (`src/shared/ui/wallet.js`, `createWallet()`) opens a gallery modal showing each won NFT (square cards) with its style name and win count (`xN`), **grouped by game** with a heading per game. It's shared by the catalog and every game. The NFT-award modal (game-side) includes a Download button (`downloadNftImage` in the game's `main.js`); the old "Cerrar sitio" button was removed.
+- El pool de NFTs se construye dinámicamente en build vía `import.meta.glob("../../../assets/nfts/*.{png,jpg,jpeg,webp,avif}")` — suelta un archivo en `assets/nfts/` y queda incluido automáticamente (sin lista hardcodeada).
+- Al completar, tras la cuenta regresiva, el juego llama `awardRandomNft(gameId)` (p. ej. `awardRandomNft("sistema-solar")`) para elegir uno al azar y registrarlo bajo ese juego.
+- **La persistencia es una cookie**, clave `av_nft_gallery_v3` (max-age 180 días), guardando `{ games: { [gameId]: { counts, order } }, lastWonAt }`. En la primera lectura auto-migra desde la cookie plana `v2` y desde el `localStorage` legacy (`academia_virtualis_gallery_v1`), asignando esos premios viejos a `sistema-solar`.
+- `getGallerySummary()` devuelve los premios agrupados por juego: `[{ gameId, nombre, items: [{ imageSrc, styleName, count }] }]`, omitiendo juegos sin premios.
+- Los nombres de estilo se derivan del segmento del nombre de archivo tras el **último guion** antes de la extensión: `NFT-SistemaSolar-1-LooneyTunes.png` → `Looney Tunes` (`getNftStyleName`).
+- La wallet 🏆 (`src/shared/ui/wallet.js`, `createWallet()`) abre un modal de galería con cada NFT ganado (tarjetas cuadradas) con su nombre de estilo y conteo (`xN`), **agrupado por juego** con un encabezado por juego. La comparten el catálogo y cada juego. El modal de premio (lado del juego) incluye un botón Descargar (`downloadNftImage` en el `main.js` del juego); el viejo botón "Cerrar sitio" fue removido.
 
-## Security & Configuration
+## AR sin marcador (investigación en curso)
 
-- The remote tunnel uses HTTP Basic Auth; keep credentials configurable via env vars (`TUNNEL_USER` / `TUNNEL_PASSWORD`).
-- Camera access on iOS requires HTTPS (or localhost). Use `dev:remote` for real-device testing over HTTPS.
-- Large generated folders (`dist/`, `node_modules/`) stay untracked. `public/vendor/` and `public/assets/` are generated by the sync scripts.
+Existe un análisis sobre migrar de marcador a **AR sin marcador / world tracking** (anclar objetos a superficies reales como una mesa o almohada) en `docs/arquitectura/2026-06-16-ar-sin-marcador.md`. Resumen: la vía estándar gratuita (**WebXR `immersive-ar`**) **no está soportada en Safari iOS** a junio 2026 — pendiente de verificar si la nueva versión de iOS/Safari lo habilita. Alternativas: tap-to-place + giroscopio (gratis, 3DoF, no resiste traslación) o plataformas SLAM de pago (Onirix, etc.). Decisión pendiente.
+
+## Seguridad y configuración
+
+- El túnel remoto usa HTTP Basic Auth; mantén las credenciales configurables vía variables de entorno (`TUNNEL_USER` / `TUNNEL_PASSWORD`).
+- El acceso a la cámara en iOS requiere HTTPS (o localhost). Usa `dev:remote` para probar en dispositivo real sobre HTTPS.
+- Las carpetas generadas grandes (`dist/`, `node_modules/`) quedan sin trackear. `public/vendor/` y `public/assets/` son generadas por los scripts de sync.
